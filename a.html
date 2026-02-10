@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>מערכת ניהול משחקים מתקדמת</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --secondary: #818cf8;
+            --bg: #f3f4f6;
+            --glass: rgba(255, 255, 255, 0.95);
+            --text: #1f2937;
+            --danger: #ef4444;
+            --success: #10b981;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);
+            color: var(--text);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: var(--glass);
+            border-radius: 24px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        /* כותרות ופרטים */
+        .header-panel {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        .header-inputs input {
+            border: none;
+            background: transparent;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--primary);
+            width: 150px;
+            border-bottom: 2px dashed #cbd5e1;
+        }
+
+        /* סרגל כלים */
+        .toolbar {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .search-box {
+            flex-grow: 1;
+            position: relative;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 12px 40px 12px 15px;
+            border-radius: 12px;
+            border: 1px solid #d1d5db;
+            outline: none;
+        }
+
+        .search-box i {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #9ca3af;
+        }
+
+        button {
+            padding: 10px 18px;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-success { background: var(--success); color: white; }
+        .btn-outline { background: white; border: 1px solid #d1d5db; color: var(--text); }
+        .btn-danger { background: #fee2e2; color: var(--danger); }
+        
+        button:hover { transform: translateY(-2px); shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        button:active { transform: translateY(0); }
+
+        /* טבלה */
+        .table-wrapper {
+            overflow-x: auto;
+            border-radius: 16px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            min-width: 800px;
+        }
+
+        th {
+            background: var(--primary);
+            color: white;
+            padding: 16px;
+            text-align: right;
+            cursor: pointer;
+            user-select: none;
+            position: sticky;
+            top: 0;
+            white-space: nowrap;
+        }
+
+        th:hover { background: #4338ca; }
+
+        td {
+            padding: 10px;
+            border-bottom: 1px solid #f3f4f6;
+        }
+
+        /* שורת סיכום */
+        tfoot tr {
+            background-color: #f8fafc;
+            font-weight: bold;
+            border-top: 2px solid #e2e8f0;
+        }
+        
+        tfoot td {
+            color: var(--primary);
+            font-size: 1.1em;
+        }
+
+        input.cell-input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid transparent;
+            border-radius: 6px;
+            transition: all 0.2s;
+            background: transparent;
+        }
+
+        input.cell-input:focus {
+            background: white;
+            border-color: var(--secondary);
+            box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.2);
+            outline: none;
+        }
+
+        input.cell-input[type="number"] { font-family: monospace; }
+
+        /* כפתורי פעולה בשורה */
+        .row-actions {
+            display: flex;
+            gap: 5px;
+            opacity: 0.3;
+            transition: opacity 0.2s;
+        }
+        tr:hover .row-actions { opacity: 1; }
+
+        .action-btn {
+            padding: 6px;
+            background: #f3f4f6;
+            border-radius: 6px;
+            color: #6b7280;
+            cursor: pointer;
+        }
+        .action-btn:hover { background: #e5e7eb; color: var(--text); }
+        .action-btn.delete:hover { background: #fee2e2; color: var(--danger); }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    
+    <div class="header-panel">
+        <div>
+            <h1>ניהול הדפסות ומשטחים</h1>
+            <div style="color: #6b7280; font-size: 0.9em;">מערכת חכמה לניהול לוגיסטי</div>
+        </div>
+        <div style="text-align: left;">
+            <div>יום: <input type="text" id="dayInput"></div>
+            <div>שם אחראי: <input type="text" id="nameInput" value="קובי"></div>
+        </div>
+    </div>
+
+    <div class="toolbar">
+        <div class="search-box">
+            <i class="fas fa-search"></i>
+            <input type="text" id="searchInput" placeholder="חפש לפי שם קופה או נתונים..." onkeyup="filterTable()">
+        </div>
+        <button class="btn-primary" onclick="addRow()"><i class="fas fa-plus"></i> שורה חדשה</button>
+        <button class="btn-outline" onclick="addColumn()"><i class="fas fa-columns"></i> הוסף עמודה</button>
+        <button class="btn-success" onclick="exportToCSV()"><i class="fas fa-file-excel"></i> ייצוא לאקסל</button>
+        <button class="btn-danger" onclick="resetTable()"><i class="fas fa-trash-alt"></i> אפס הכל</button>
+    </div>
+
+    <div class="table-wrapper">
+        <table id="mainTable">
+            <thead>
+                <tr id="headerRow">
+                    <th onclick="sortTable(0)">שם קופה <i class="fas fa-sort"></i></th>
+                    <th onclick="sortTable(1)">מספר משטחים <i class="fas fa-sort"></i></th>
+                    <th onclick="sortTable(2)">כמות משחקים <i class="fas fa-sort"></i></th>
+                    <th onclick="sortTable(3)">הודפס משחקים <i class="fas fa-sort"></i></th>
+                    <th onclick="sortTable(4)">הודפס פירוט <i class="fas fa-sort"></i></th>
+                    <th style="width: 80px;">פעולות</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody">
+                </tbody>
+            <tfoot>
+                <tr id="footerRow">
+                    <td>סה"כ:</td>
+                    <td id="sum-col-1">0</td>
+                    <td id="sum-col-2">0</td>
+                    <td id="sum-col-3">0</td>
+                    <td id="sum-col-4">0</td>
+                    <td></td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+</div>
+
+<script>
+    // --- משתנים גלובליים ---
+    const tableBody = document.getElementById('tableBody');
+    const headerRow = document.getElementById('headerRow');
+    const footerRow = document.getElementById('footerRow');
+    const days = ["ראשון", "שני", "שלישי", "רביעי", "חמישי", "שישי", "שבת"];
+    
+    // --- אתחול המערכת ---
+    window.onload = function() {
+        document.getElementById('dayInput').value = days[new Date().getDay()];
+        loadData(); // טעינת נתונים שמורים
+        calculateTotals(); // חישוב ראשוני
+    };
+
+    // --- הוספת שורה ---
+    function addRow(data = []) {
+        const row = tableBody.insertRow();
+        const colCount = headerRow.cells.length - 1; // פחות עמודת הפעולות
+
+        for (let i = 0; i < colCount; i++) {
+            const cell = row.insertCell();
+            const input = document.createElement('input');
+            input.className = 'cell-input';
+            
+            // זיהוי סוג קלט (מספרים בעמודות ספציפיות)
+            // הנחה: עמודות 1, 2, 3 הן מספריות בברירת המחדל
+            if (i >= 1 && i <= 3) {
+                input.type = 'number';
+            } else {
+                input.type = 'text';
+            }
+            
+            input.value = data[i] || '';
+            input.placeholder = '-';
+            input.oninput = saveDataAndCalc; // שמירה וחישוב בכל שינוי
+            cell.appendChild(input);
+        }
+
+        // עמודת פעולות
+        const actionCell = row.insertCell();
+        actionCell.innerHTML = `
+            <div class="row-actions">
+                <div class="action-btn" onclick="duplicateRow(this)" title="שכפל"><i class="fas fa-copy"></i></div>
+                <div class="action-btn delete" onclick="deleteRow(this)" title="מחק"><i class="fas fa-trash"></i></div>
+            </div>
+        `;
+        
+        saveDataAndCalc();
+    }
+
+    // --- מחיקת שורה ---
+    function deleteRow(btn) {
+        if(confirm('האם למחוק שורה זו?')) {
+            const row = btn.closest('tr');
+            row.remove();
+            saveDataAndCalc();
+        }
+    }
+
+    // --- שכפול שורה ---
+    function duplicateRow(btn) {
+        const row = btn.closest('tr');
+        const inputs = row.querySelectorAll('input');
+        const rowData = Array.from(inputs).map(input => input.value);
+        addRow(rowData);
+    }
+
+    // --- הוספת עמודה ---
+    function addColumn() {
+        const name = prompt("שם העמודה החדשה:");
+        if (!name) return;
+
+        // הוספה לכותרת (לפני עמודת הפעולות)
+        const lastIndex = headerRow.cells.length - 1;
+        const th = document.createElement('th');
+        th.innerHTML = `${name} <i class="fas fa-sort"></i>`;
+        th.onclick = function() { sortTable(lastIndex) };
+        th.ondblclick = function() { editHeader(this) }; // עריכה בדאבל קליק
+        headerRow.insertBefore(th, headerRow.cells[lastIndex]);
+
+        // הוספה לגוף הטבלה
+        for (let row of tableBody.rows) {
+            const cell = row.insertCell(lastIndex);
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.className = 'cell-input';
+            input.oninput = saveDataAndCalc;
+            cell.appendChild(input);
+        }
+
+        // הוספה לסיכום (Footer)
+        const footerCell = footerRow.insertCell(lastIndex);
+        footerCell.id = `sum-col-${Date.now()}`; // ID ייחודי
+        footerCell.innerText = "0";
+
+        saveDataAndCalc();
+    }
+
+    // --- עריכת שם כותרת ---
+    function editHeader(th) {
+        const newName = prompt("שנה שם עמודה:", th.innerText);
+        if (newName) th.innerHTML = `${newName} <i class="fas fa-sort"></i>`;
+        saveData();
+    }
+
+    // --- חישוב סיכומים ---
+    function calculateTotals() {
+        const rows = tableBody.rows;
+        const colCount = headerRow.cells.length - 1;
+        
+        // מעבר על כל עמודה
+        for (let c = 1; c < colCount; c++) { 
+            let sum = 0;
+            let isNumericColumn = true;
+
+            for (let r = 0; r < rows.length; r++) {
+                if (rows[r].style.display !== 'none') { // מחשב רק שורות גלויות (מסוננות)
+                    const input = rows[r].cells[c].querySelector('input');
+                    if (input) {
+                        const val = parseFloat(input.value);
+                        if (!isNaN(val)) {
+                            sum += val;
+                        } else if (input.value !== '') {
+                            isNumericColumn = false; // אם יש טקסט שאינו מספר, לא נציג סיכום
+                        }
+                    }
+                }
+            }
+
+            // עדכון ה-Footer (אם קיים תא מתאים)
+            // הערה: בגלל הדינמיות, אנו ניגשים לתא ב-Footer לפי האינדקס
+            if (footerRow.cells[c]) {
+                footerRow.cells[c].innerText = isNumericColumn ? sum.toLocaleString() : '-';
+            }
+        }
+    }
+
+    // --- חיפוש וסינון ---
+    function filterTable() {
+        const term = document.getElementById('searchInput').value.toLowerCase();
+        const rows = tableBody.rows;
+
+        for (let row of rows) {
+            const inputs = row.querySelectorAll('input');
+            let found = false;
+            inputs.forEach(input => {
+                if (input.value.toLowerCase().includes(term)) found = true;
+            });
+            row.style.display = found ? '' : 'none';
+        }
+        calculateTotals();
+    }
+
+    // --- מיון ---
+    function sortTable(n) {
+        let rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+        switching = true;
+        dir = "asc"; 
+        
+        while (switching) {
+            switching = false;
+            rows = tableBody.rows;
+            
+            for (i = 0; i < (rows.length - 1); i++) {
+                shouldSwitch = false;
+                x = rows[i].cells[n].querySelector('input').value;
+                y = rows[i + 1].cells[n].querySelector('input').value;
+
+                // בדיקה אם זה מספר
+                let numX = parseFloat(x);
+                let numY = parseFloat(y);
+                let isNum = !isNaN(numX) && !isNaN(numY) && x !== '' && y !== '';
+
+                if (dir == "asc") {
+                    if (isNum ? numX > numY : x.toLowerCase() > y.toLowerCase()) {
+                        shouldSwitch = true;
+                        break;
+                    }
+                } else if (dir == "desc") {
+                    if (isNum ? numX < numY : x.toLowerCase() < y.toLowerCase()) {
+                        shouldSwitch = true;
+                        break;
+                    }
+                }
+            }
+            if (shouldSwitch) {
+                rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                switching = true;
+                switchcount ++; 
+            } else {
+                if (switchcount == 0 && dir == "asc") {
+                    dir = "desc";
+                    switching = true;
+                }
+            }
+        }
+    }
+
+    // --- שמירה וטעינה (LocalStorage) ---
+    function saveDataAndCalc() {
+        calculateTotals();
+        saveData();
+    }
+
+    function saveData() {
+        const data = [];
+        for (let row of tableBody.rows) {
+            const rowData = [];
+            row.querySelectorAll('input').forEach(input => rowData.push(input.value));
+            data.push(rowData);
+        }
+        
+        // שמירת שמות העמודות
+        const headers = [];
+        for (let i=0; i < headerRow.cells.length -1; i++) {
+            headers.push(headerRow.cells[i].innerText.replace(' ', '')); // ניקוי אייקונים בטקסט
+        }
+
+        const state = {
+            rows: data,
+            headers: headers,
+            day: document.getElementById('dayInput').value,
+            name: document.getElementById('nameInput').value
+        };
+        
+        localStorage.setItem('gameTableData', JSON.stringify(state));
+    }
+
+    function loadData() {
+        const saved = localStorage.getItem('gameTableData');
+        if (saved) {
+            const state = JSON.parse(saved);
+            document.getElementById('dayInput').value = state.day;
+            document.getElementById('nameInput').value = state.name;
+
+            // שחזור עמודות (אם נוספו חדשות מעבר לברירת המחדל)
+            // זהו מימוש פשוט. בגרסה מלאה נצטרך לוגיקה חכמה יותר לבניית ה-TH מחדש.
+            // כרגע נטען רק את השורות לטבלה הקיימת.
+            
+            tableBody.innerHTML = '';
+            state.rows.forEach(rowData => addRow(rowData));
+        } else {
+            addRow(); // שורה ראשונה ריקה
+            addRow();
+            addRow();
+        }
+    }
+
+    function resetTable() {
+        if(confirm("למחוק הכל ולהתחיל מחדש?")) {
+            localStorage.removeItem('gameTableData');
+            location.reload();
+        }
+    }
+
+    // --- ייצוא ל-CSV (אקסל) ---
+    function exportToCSV() {
+        let csvContent = "data:text/csv;charset=utf-8,\uFEFF"; // BOM לעברית
+        
+        // כותרות
+        const headers = Array.from(headerRow.cells).map(cell => cell.innerText.trim()).slice(0, -1);
+        csvContent += headers.join(",") + "\r\n";
+
+        // שורות
+        for (let row of tableBody.rows) {
+            const rowData = Array.from(row.querySelectorAll('input')).map(input => {
+                let val = input.value.replace(/"/g, '""'); // טיפול במרכאות
+                return `"${val}"`;
+            });
+            csvContent += rowData.join(",") + "\r\n";
+        }
+
+        // הורדה
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", `דוח_משחקים_${new Date().toLocaleDateString()}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+</script>
+
+</body>
+</html>
