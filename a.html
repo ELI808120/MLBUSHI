@@ -2,27 +2,26 @@
 <html lang="he" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>מערכת ניהול מתקדמת - קובי</title>
+    <title>דוח קופות להדפסה</title>
     <style>
-        /* --- עיצוב בסיסי --- */
+        /* --- עיצוב כללי --- */
         body {
-            font-family: 'Segoe UI', Arial, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 20px;
-            background-color: #f4f6f8;
+            background-color: #f0f2f5;
             color: #333;
         }
 
-        /* --- קומה 1: כותרות עליונות --- */
-        .top-section {
-            background-color: #fff;
+        /* --- אזור כותרות (למעלה) --- */
+        .header-container {
+            background: #fff;
             padding: 20px;
             border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
             margin-bottom: 20px;
             display: flex;
-            gap: 30px;
-            align-items: flex-end;
-            flex-wrap: wrap;
+            gap: 40px;
+            border: 1px solid #ddd;
         }
 
         .input-group {
@@ -32,74 +31,54 @@
 
         .input-group label {
             font-weight: bold;
-            font-size: 14px;
             margin-bottom: 5px;
-            color: #555;
+            font-size: 14px;
         }
 
         .input-group input {
-            padding: 10px;
+            padding: 8px;
             font-size: 16px;
             border: 1px solid #ccc;
             border-radius: 4px;
-            width: 220px;
-            background: #fff;
-            transition: border 0.3s;
+            width: 200px;
         }
-        
-        .input-group input:focus { border-color: #007bff; outline: none; }
 
-        /* --- קומה 2: כפתורים וחיפוש --- */
-        .controls-section {
-            background-color: #e9ecef;
+        /* --- אזור כפתורים (לא מודפס) --- */
+        .toolbar {
+            background: #e4e6eb;
             padding: 15px;
             border-radius: 8px;
             margin-bottom: 20px;
             display: flex;
+            gap: 10px;
             align-items: center;
-            gap: 12px;
-            flex-wrap: wrap;
-            border: 1px solid #dee2e6;
-        }
-
-        .search-box { flex-grow: 1; min-width: 200px; }
-        
-        .search-box input {
-            width: 100%;
-            padding: 12px;
-            font-size: 16px;
             border: 1px solid #ccc;
-            border-radius: 6px;
+            flex-wrap: wrap;
         }
 
         button {
-            padding: 10px 18px;
-            font-size: 14px;
+            padding: 10px 20px;
+            font-size: 15px;
             font-weight: bold;
-            cursor: pointer;
             color: white;
             border: none;
             border-radius: 6px;
-            transition: transform 0.1s;
-            white-space: nowrap;
+            cursor: pointer;
+            transition: 0.2s;
         }
 
-        button:active { transform: scale(0.98); }
+        button:hover { opacity: 0.9; }
 
-        .btn-add { background-color: #28a745; }
-        .btn-print { background-color: #007bff; }
-        .btn-excel { background-color: #17a2b8; }
-        .btn-clear-nums { background-color: #ffc107; color: #333; }
-        .btn-reset { background-color: #dc3545; }
+        .btn-add { background-color: #28a745; } /* ירוק */
+        .btn-print { background-color: #007bff; } /* כחול */
+        .btn-empty { background-color: #6f42c1; border: 2px solid #5a32a3; } /* סגול - להדפסה ריקה */
+        .btn-reset { background-color: #dc3545; } /* אדום */
 
-        /* --- קומה 3: הטבלה --- */
-        .table-section {
-            background-color: #fff;
-            padding: 0;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-            overflow: hidden;
-            border: 1px solid #e0e0e0;
+        /* --- טבלה --- */
+        .table-wrap {
+            background: #fff;
+            border: 1px solid #ccc;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
         }
 
         table {
@@ -108,344 +87,207 @@
         }
 
         th, td {
-            border: 1px solid #e0e0e0;
-            padding: 12px;
+            border: 1px solid #bbb;
+            padding: 12px; /* רווח נח לכתיבה */
             text-align: right;
-            vertical-align: middle;
+            height: 35px; /* גובה שורה קבוע */
         }
 
         th {
             background-color: #343a40;
             color: white;
-            cursor: pointer; /* מסמן שאפשר למיין */
-            user-select: none;
+            -webkit-print-color-adjust: exact;
         }
-        
-        th:hover { background-color: #495057; }
-
-        /* שורת סיכום */
-        tfoot {
-            background-color: #f8f9fa;
-            font-weight: bold;
-            border-top: 2px solid #343a40;
-        }
-        
-        tfoot td { color: #007bff; font-size: 1.1em; }
 
         /* שדות קלט בטבלה */
         td input {
             width: 100%;
+            height: 100%;
             border: none;
+            outline: none;
             font-size: 16px;
             background: transparent;
-            outline: none;
-            padding: 4px;
         }
-        
-        td input:focus { background-color: #e8f0fe; border-radius: 4px; }
-
-        /* שורה שבוצעה (ירוקה) */
-        tr.completed { background-color: #d4edda !important; }
-        tr.completed input { background-color: transparent !important; }
-
-        /* כפתורי פעולה בשורה */
-        .row-actions { display: flex; gap: 5px; justify-content: center; }
-        .mini-btn {
-            padding: 4px 8px;
-            font-size: 12px;
-            border-radius: 4px;
-            cursor: pointer;
-            color: white;
-            border: none;
-        }
-        .btn-del { background: #dc3545; }
-        .btn-dup { background: #6c757d; }
 
         /* --- הגדרות הדפסה --- */
         @media print {
-            body { background-color: white; margin: 0; padding: 0; }
-            .controls-section, .row-actions, .no-print { display: none !important; }
+            @page { margin: 10mm; size: A4 landscape; } /* דף לרוחב */
             
-            .top-section {
-                box-shadow: none; border: none; padding: 0; margin-bottom: 20px;
+            body { 
+                background: white; 
+                margin: 0; 
+                -webkit-print-color-adjust: exact; 
             }
-            .top-section input {
-                border: none; border-bottom: 1px solid #000; padding: 0; width: auto; font-weight: bold;
+            
+            .toolbar, .no-print { display: none !important; } /* הסתרת כפתורים */
+
+            .header-container {
+                box-shadow: none;
+                border: none;
+                padding: 0;
+                margin-bottom: 10px;
             }
 
-            .table-section { box-shadow: none; border: none; }
-            table { border: 2px solid #000; }
-            th, td { border: 1px solid #000; color: black !important; padding: 8px; }
-            th { background-color: #eee !important; -webkit-print-color-adjust: exact; }
+            .header-container input {
+                border: none;
+                border-bottom: 1px solid #000;
+                width: 150px;
+            }
+
+            .table-wrap { box-shadow: none; border: none; }
             
-            /* הסתרת צבע רקע של שורות גמורות בהדפסה, או השארתו בצבע אפור בהיר */
-            tr.completed { background-color: #f0f0f0 !important; -webkit-print-color-adjust: exact; }
+            table { border: 2px solid #000; }
+            th, td { border: 1px solid #000; color: black !important; }
+            th { background-color: #eee !important; color: black !important; }
+            
+            /* הבטחת גובה שורה בהדפסה לכתיבה ידנית */
+            tr { height: 40px; } 
         }
     </style>
 </head>
 <body>
 
-    <div class="top-section">
+    <div class="header-container">
         <div class="input-group">
             <label>יום:</label>
-            <input type="text" id="dayInput" oninput="saveData()">
+            <input type="text" id="dayInput" placeholder="...">
         </div>
         <div class="input-group">
-            <label>שם אחראי:</label>
-            <input type="text" id="nameInput" oninput="saveData()">
+            <label>שם:</label>
+            <input type="text" id="nameInput" placeholder="...">
         </div>
         <div class="input-group">
             <label>שם קופה/קו:</label>
-            <input type="text" id="routeInput" oninput="saveData()">
+            <input type="text" id="routeInput" placeholder="...">
         </div>
     </div>
 
-    <div class="controls-section">
-        <div class="search-box">
-            <input type="text" id="searchInput" onkeyup="filterTable()" placeholder="חפש קופה...">
-        </div>
-        <button class="btn-add" onclick="addRow()">+ שורה</button>
-        <button class="btn-excel" onclick="exportToExcel()">ייצוא לאקסל</button>
-        <button class="btn-clear-nums" onclick="clearNumbersOnly()">איפוס כמויות</button>
-        <button class="btn-print" onclick="window.print()">הדפס</button>
-        <button class="btn-reset" onclick="resetAll()">איפוס מלא</button>
+    <div class="toolbar">
+        <button class="btn-empty" onclick="printEmptySheet()">🖨️ הדפס דף ריק למילוי</button>
+        <div style="border-left: 2px solid #ccc; height: 30px; margin: 0 10px;"></div> <button class="btn-add" onclick="addRow()">+ הוסף שורה</button>
+        <button class="btn-print" onclick="window.print()">הדפס מצב נוכחי</button>
+        <button class="btn-reset" onclick="resetAll()">נקה הכל</button>
     </div>
 
-    <div class="table-section">
+    <div class="table-wrap">
         <table id="mainTable">
             <thead>
                 <tr>
-                    <th onclick="sortTable(0)" title="לחץ למיון">שם קופה ⬍</th>
-                    <th onclick="sortTable(1)" title="לחץ למיון">משטחים ⬍</th>
-                    <th onclick="sortTable(2)" title="לחץ למיון">כמות משחקים ⬍</th>
-                    <th>הודפס משחקים</th>
-                    <th>הודפס פירוט</th>
-                    <th class="no-print" style="width: 80px;">פעולות</th>
+                    <th style="width: 25%">שם קופה</th>
+                    <th style="width: 15%">מס' משטחים</th>
+                    <th style="width: 15%">כמות משחקים</th>
+                    <th style="width: 20%">הודפס משחקים</th>
+                    <th style="width: 20%">הודפס פירוט</th>
+                    <th class="no-print" style="width: 50px"></th>
                 </tr>
             </thead>
             <tbody id="tableBody">
                 </tbody>
-            <tfoot>
-                <tr>
-                    <td>סה"כ:</td>
-                    <td id="totalPallets">0</td>
-                    <td id="totalGames">0</td>
-                    <td colspan="3"></td>
-                </tr>
-            </tfoot>
         </table>
     </div>
 
 <script>
-    // --- משתנים ופונקציות אתחול ---
+    // --- משתנים גלובליים ---
     const days = ["ראשון", "שני", "שלישי", "רביעי", "חמישי", "שישי", "שבת"];
 
+    // --- אתחול ---
     window.onload = function() {
-        loadData(); // טעינת נתונים מהזיכרון
-        if (document.getElementById('tableBody').rows.length === 0) {
-            // אם אין נתונים, צור ברירת מחדל
+        loadData();
+        // אם אין נתונים, שים יום נוכחי ו-5 שורות
+        if(document.getElementById('tableBody').children.length === 0) {
             document.getElementById('dayInput').value = days[new Date().getDay()];
-            for(let i=0; i<8; i++) addRow();
+            for(let i=0; i<5; i++) addRow();
         }
-        calculateTotals();
     };
 
-    // --- 1. הוספת שורה ---
-    function addRow(data = ['', '', '', '', ''], isCompleted = false) {
+    // --- הוספת שורה ---
+    function addRow(vals = ['', '', '', '', '']) {
         const tbody = document.getElementById('tableBody');
         const row = document.createElement('tr');
-        if(isCompleted) row.classList.add('completed');
-
-        // אירוע דאבל-קליק לצביעת שורה
-        row.ondblclick = function() { 
-            this.classList.toggle('completed'); 
-            saveData();
-        };
-
         row.innerHTML = `
-            <td><input type="text" value="${data[0]}" placeholder="..." oninput="saveAndCalc()" onkeydown="handleEnter(event, this)"></td>
-            <td><input type="number" value="${data[1]}" placeholder="0" oninput="saveAndCalc()" onkeydown="handleEnter(event, this)"></td>
-            <td><input type="number" value="${data[2]}" placeholder="0" oninput="saveAndCalc()" onkeydown="handleEnter(event, this)"></td>
-            <td><input type="text" value="${data[3]}" placeholder="..." oninput="saveAndCalc()" onkeydown="handleEnter(event, this)"></td>
-            <td><input type="text" value="${data[4]}" placeholder="..." oninput="saveAndCalc()" onkeydown="handleEnter(event, this)"></td>
-            <td class="no-print row-actions">
-                <button class="mini-btn btn-dup" onclick="duplicateRow(this)" title="שכפל">📄</button>
-                <button class="mini-btn btn-del" onclick="deleteRow(this)" title="מחק">X</button>
-            </td>
+            <td><input type="text" value="${vals[0]}" oninput="saveData()"></td>
+            <td><input type="number" value="${vals[1]}" oninput="saveData()"></td>
+            <td><input type="number" value="${vals[2]}" oninput="saveData()"></td>
+            <td><input type="text" value="${vals[3]}" oninput="saveData()"></td>
+            <td><input type="text" value="${vals[4]}" oninput="saveData()"></td>
+            <td class="no-print" style="text-align:center; cursor:pointer; color:red; font-weight:bold;" onclick="removeRow(this)">X</td>
         `;
         tbody.appendChild(row);
     }
 
-    // --- 2. שמירה אוטומטית וחישוב ---
-    function saveAndCalc() {
-        calculateTotals();
+    function removeRow(btn) {
+        btn.parentElement.remove();
         saveData();
     }
 
-    function calculateTotals() {
-        let pallets = 0;
-        let games = 0;
-        const rows = document.getElementById('tableBody').rows;
-
-        for (let row of rows) {
-            if (row.style.display !== 'none') { // מחשב רק שורות גלויות
-                const inputs = row.getElementsByTagName('input');
-                pallets += Number(inputs[1].value) || 0;
-                games += Number(inputs[2].value) || 0;
-            }
-        }
-        document.getElementById('totalPallets').innerText = pallets;
-        document.getElementById('totalGames').innerText = games;
-    }
-
-    // --- 3. ניהול נתונים (LocalStorage) ---
+    // --- שמירה וטעינה ---
     function saveData() {
-        const rows = [];
-        document.querySelectorAll('#tableBody tr').forEach(row => {
-            const inputs = row.querySelectorAll('input');
-            rows.push({
-                vals: [inputs[0].value, inputs[1].value, inputs[2].value, inputs[3].value, inputs[4].value],
-                done: row.classList.contains('completed')
-            });
-        });
+        // שומר רק אם אנחנו לא במצב "דף ריק" (למניעת דריסה)
+        if (sessionStorage.getItem('printingEmpty') === 'true') return;
 
-        const headerData = {
+        const rows = [];
+        document.querySelectorAll('#tableBody tr').forEach(tr => {
+            const inputs = tr.querySelectorAll('input');
+            rows.push([inputs[0].value, inputs[1].value, inputs[2].value, inputs[3].value, inputs[4].value]);
+        });
+        const header = {
             day: document.getElementById('dayInput').value,
             name: document.getElementById('nameInput').value,
             route: document.getElementById('routeInput').value
         };
-
-        localStorage.setItem('kobiTableData', JSON.stringify({ rows, headerData }));
+        localStorage.setItem('kobiTable_v3', JSON.stringify({ rows, header }));
     }
 
     function loadData() {
-        const saved = JSON.parse(localStorage.getItem('kobiTableData'));
-        if (saved) {
-            document.getElementById('dayInput').value = saved.headerData.day || '';
-            document.getElementById('nameInput').value = saved.headerData.name || '';
-            document.getElementById('routeInput').value = saved.headerData.route || '';
-            
-            document.getElementById('tableBody').innerHTML = '';
-            saved.rows.forEach(r => addRow(r.vals, r.done));
+        const data = JSON.parse(localStorage.getItem('kobiTable_v3'));
+        if (data) {
+            document.getElementById('dayInput').value = data.header.day;
+            document.getElementById('nameInput').value = data.header.name;
+            document.getElementById('routeInput').value = data.header.route;
+            data.rows.forEach(r => addRow(r));
         }
     }
 
-    // --- 4. פונקציות עזר (Enter, שכפול, מחיקה) ---
-    function handleEnter(e, input) {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            const inputs = Array.from(document.querySelectorAll('input')); // כל האינפוטים בדף
-            const index = inputs.indexOf(input);
-            if (index + 1 < inputs.length) {
-                inputs[index + 1].focus(); // עבור לתא הבא
-            } else {
-                addRow(); // אם זה האחרון, הוסף שורה
-                setTimeout(() => {
-                    const newInputs = document.querySelectorAll('input');
-                    newInputs[newInputs.length - 5].focus(); // פוקוס לשורה החדשה
-                }, 50);
-            }
-        }
-    }
+    // --- הפונקציה המיוחדת להדפסה ריקה ---
+    function printEmptySheet() {
+        if(!confirm("להכין דף ריק (40 שורות) להדפסה?")) return;
+        
+        // 1. שמירת המצב הנוכחי ליתר ביטחון
+        saveData();
+        
+        // 2. סימון שאנחנו במצב הדפסה (כדי לא לשמור בטעות את הריק)
+        sessionStorage.setItem('printingEmpty', 'true');
 
-    function duplicateRow(btn) {
-        const row = btn.closest('tr');
-        const inputs = row.querySelectorAll('input');
-        const values = Array.from(inputs).map(i => i.value);
-        addRow(values);
-        saveAndCalc();
-    }
+        // 3. ניקוי הטבלה ויצירת 40 שורות ריקות
+        const tbody = document.getElementById('tableBody');
+        tbody.innerHTML = '';
+        
+        // ניקוי כותרות רק לתצוגה
+        document.getElementById('dayInput').value = ''; 
+        document.getElementById('nameInput').value = ''; 
+        document.getElementById('routeInput').value = ''; 
 
-    function deleteRow(btn) {
-        if(confirm('למחוק שורה?')) {
-            btn.closest('tr').remove();
-            saveAndCalc();
+        for(let i=0; i<40; i++) { // 40 שורות זה בערך דף A4 מלא
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td></td><td></td><td></td><td></td><td></td>
+                <td class="no-print"></td>
+            `;
+            tbody.appendChild(row);
         }
-    }
 
-    // --- 5. כפתורים מיוחדים (ניקוי, ייצוא, מיון) ---
-    function clearNumbersOnly() {
-        if(confirm('האם לאפס רק את הכמויות (ולהשאיר שמות)?')) {
-            document.querySelectorAll('#tableBody tr').forEach(row => {
-                const inputs = row.querySelectorAll('input');
-                inputs[1].value = ''; // משטחים
-                inputs[2].value = ''; // משחקים
-                inputs[3].value = ''; // הודפס
-                inputs[4].value = ''; // הודפס פירוט
-                row.classList.remove('completed');
-            });
-            saveAndCalc();
-        }
+        // 4. הדפסה
+        setTimeout(() => {
+            window.print();
+            // 5. רענון הדף כדי להחזיר את הנתונים המקוריים
+            location.reload(); 
+        }, 500);
     }
 
     function resetAll() {
-        if(confirm('זה ימחק הכל! בטוח?')) {
-            localStorage.removeItem('kobiTableData');
+        if(confirm("למחוק הכל?")) {
+            localStorage.removeItem('kobiTable_v3');
             location.reload();
-        }
-    }
-
-    function exportToExcel() {
-        let csv = "שם קופה,מספר משטחים,כמות משחקים,הודפס משחקים,הודפס פירוט\n";
-        document.querySelectorAll('#tableBody tr').forEach(row => {
-            if (row.style.display !== 'none') {
-                const cols = row.querySelectorAll('input');
-                const rowData = Array.from(cols).map(c => `"${c.value}"`).join(",");
-                csv += rowData + "\n";
-            }
-        });
-        
-        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-        const link = document.createElement("a");
-        const url = URL.createObjectURL(blob);
-        link.setAttribute("href", url);
-        link.setAttribute("download", `דוח_קובי_${new Date().toLocaleDateString()}.csv`);
-        link.click();
-    }
-
-    function filterTable() {
-        const term = document.getElementById('searchInput').value.toLowerCase();
-        const rows = document.getElementById('tableBody').rows;
-        for (let row of rows) {
-            const txt = row.getElementsByTagName('input')[0].value.toLowerCase();
-            row.style.display = txt.includes(term) ? '' : 'none';
-        }
-        calculateTotals();
-    }
-
-    function sortTable(n) {
-        const table = document.getElementById("mainTable");
-        let switching = true, shouldSwitch, dir = "asc", switchcount = 0;
-        
-        while (switching) {
-            switching = false;
-            const rows = table.rows;
-            // לולאה על שורות הטבלה (מדלגים על כותרת ופוטר)
-            for (let i = 1; i < (rows.length - 2); i++) {
-                shouldSwitch = false;
-                const x = rows[i].getElementsByTagName("input")[n].value;
-                const y = rows[i + 1].getElementsByTagName("input")[n].value;
-                
-                // בדיקה אם מספר או טקסט
-                const isNum = !isNaN(parseFloat(x)) && !isNaN(parseFloat(y)) && x!=='' && y!=='';
-                
-                if (dir == "asc") {
-                    if (isNum ? parseFloat(x) > parseFloat(y) : x.toLowerCase() > y.toLowerCase()) {
-                        shouldSwitch = true; break;
-                    }
-                } else {
-                    if (isNum ? parseFloat(x) < parseFloat(y) : x.toLowerCase() < y.toLowerCase()) {
-                        shouldSwitch = true; break;
-                    }
-                }
-            }
-            if (shouldSwitch) {
-                rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
-                switching = true;
-                switchcount++;
-            } else {
-                if (switchcount == 0 && dir == "asc") { dir = "desc"; switching = true; }
-            }
         }
     }
 </script>
