@@ -2,170 +2,192 @@
 <html lang="he" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>ניהול קופות והדפסות</title>
+    <title>דוח קופות - גרסה מתוקנת</title>
     <style>
-        /* עיצוב כללי */
+        /* --- עיצוב בסיסי ונקי --- */
         body {
-            font-family: 'Segoe UI', Arial, sans-serif;
-            margin: 0;
-            padding: 20px;
-            background-color: #f4f7f9;
-            color: #333;
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f0f0f0; /* רקע אפור בהיר למסך */
         }
 
-        /* כותרות עליונות - תמיד בראש הדף */
-        .top-header {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-        }
-
-        .input-field {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .input-field label { font-weight: bold; white-space: nowrap; }
-
-        .input-field input {
-            width: 100%;
-            padding: 8px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            font-size: 16px;
-        }
-
-        /* סרגל כלים - חיפוש וכפתורים */
-        .toolbar {
-            background: #e9ecef;
+        /* --- קומה 1: כותרות עליונות --- */
+        .top-section {
+            background-color: #fff;
             padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            margin-bottom: 20px; /* מרווח בטוח מהכפתורים */
             display: flex;
-            justify-content: space-between;
+            gap: 30px;
             align-items: center;
-            gap: 10px;
         }
 
-        .search-box { flex-grow: 1; }
+        .input-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .input-group label {
+            font-weight: bold;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+
+        .input-group input {
+            padding: 8px;
+            font-size: 16px;
+            border: 1px solid #999;
+            width: 200px;
+            background: #fff;
+        }
+
+        /* --- קומה 2: כפתורים וחיפוש --- */
+        .controls-section {
+            background-color: #e2e2e2;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px; /* מרווח בטוח מהטבלה */
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            border: 1px solid #ccc;
+        }
+
+        .search-box {
+            flex-grow: 1;
+        }
+        
         .search-box input {
-            width: 90%;
+            width: 100%;
             padding: 10px;
-            border-radius: 5px;
-            border: 1px solid #ddd;
+            font-size: 16px;
+            border: 1px solid #999;
+            box-sizing: border-box; /* שלא יחרוג מהרוחב */
         }
-
-        .buttons { display: flex; gap: 10px; }
 
         button {
             padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
+            font-size: 16px;
             font-weight: bold;
+            cursor: pointer;
             color: white;
+            border: none;
+            border-radius: 4px;
         }
 
-        .btn-add { background: #28a745; }
-        .btn-print { background: #007bff; }
-        .btn-clear { background: #dc3545; }
+        .btn-add { background-color: #28a745; } /* ירוק */
+        .btn-print { background-color: #007bff; } /* כחול */
+        .btn-reset { background-color: #dc3545; } /* אדום */
 
-        /* טבלה */
-        .table-container {
-            background: white;
+        /* --- קומה 3: הטבלה --- */
+        .table-section {
+            background-color: #fff;
             padding: 10px;
-            border-radius: 10px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            overflow-x: auto;
+            border: 1px solid #ccc;
         }
 
         table {
             width: 100%;
-            border-collapse: collapse;
+            border-collapse: collapse; /* גבולות צמודים */
         }
 
-        th {
-            background: #343a40;
-            color: white;
-            padding: 12px;
+        th, td {
+            border: 1px solid #000;
+            padding: 10px;
             text-align: right;
         }
 
-        td {
-            border-bottom: 1px solid #dee2e6;
-            padding: 8px;
+        th {
+            background-color: #ddd;
         }
 
-        .cell-input {
+        /* שדות קלט בתוך הטבלה */
+        td input {
             width: 100%;
-            padding: 8px;
-            border: 1px solid transparent;
-            box-sizing: border-box;
+            border: none;
+            font-size: 16px;
             background: transparent;
-        }
-
-        .cell-input:focus {
-            border: 1px solid #007bff;
-            background: white;
             outline: none;
         }
+        
+        td input:focus {
+            background-color: #f0f8ff; /* צבע רקע עדין בזמן כתיבה */
+        }
 
-        /* עיצוב להדפסה בלבד */
+        /* --- הגדרות הדפסה (קריטי!) --- */
         @media print {
-            .toolbar, .btn-row-delete, .no-print { display: none !important; }
-            body { padding: 0; background: white; }
-            .top-header { box-shadow: none; border: 1px solid #000; padding: 10px; }
-            .table-container { box-shadow: none; }
-            table { border: 1px solid #000; }
-            th, td { border: 1px solid #000; color: black; }
-            .input-field input { border: none; }
+            body { 
+                background-color: white; 
+                margin: 0;
+            }
+            
+            /* הסתר את אזור הכפתורים והחיפוש בהדפסה */
+            .controls-section, .btn-delete-row {
+                display: none !important;
+            }
+
+            /* הסר מסגרות ורקעים מהכותרות העליונות */
+            .top-section {
+                border: none;
+                margin-bottom: 10px;
+                padding: 0;
+            }
+
+            .top-section input {
+                border: none;
+                border-bottom: 1px solid #000; /* רק קו תחתון */
+                width: auto;
+            }
+
+            /* וודא שהטבלה שחורה וברורה */
+            .table-section {
+                border: none;
+                padding: 0;
+            }
+            
+            th {
+                background-color: #eee !important;
+                -webkit-print-color-adjust: exact;
+            }
         }
     </style>
 </head>
 <body>
 
-    <div class="top-header">
-        <div class="input-field">
+    <div class="top-section">
+        <div class="input-group">
             <label>יום:</label>
-            <input type="text" id="headerDay" placeholder="...">
+            <input type="text" id="dayInput" placeholder="רשום יום...">
         </div>
-        <div class="input-field">
+        <div class="input-group">
             <label>שם:</label>
-            <input type="text" id="headerName" placeholder="...">
+            <input type="text" id="nameInput" placeholder="שם האחראי...">
         </div>
-        <div class="input-field">
+        <div class="input-group">
             <label>שם קופה/קו:</label>
-            <input type="text" id="headerRoute" placeholder="...">
+            <input type="text" id="routeInput" placeholder="רשום שם קופה...">
         </div>
     </div>
 
-    <div class="toolbar">
+    <div class="controls-section">
         <div class="search-box">
-            <input type="text" id="searchInput" placeholder="חפש בטבלה..." onkeyup="filterTable()">
+            <input type="text" id="searchInput" onkeyup="filterTable()" placeholder="חפש לפי שם קופה או נתון אחר...">
         </div>
-        <div class="buttons">
-            <button class="btn-add" onclick="addRow()">הוסף שורה +</button>
-            <button class="btn-print" onclick="window.print()">הדפס דוח</button>
-            <button class="btn-clear" onclick="clearAll()">נקה הכל</button>
-        </div>
+        <button class="btn-add" onclick="addRow()">+ הוסף שורה</button>
+        <button class="btn-print" onclick="window.print()">הדפס דף</button>
+        <button class="btn-reset" onclick="resetTable()">נקה הכל</button>
     </div>
 
-    <div class="table-container">
+    <div class="table-section">
         <table id="mainTable">
             <thead>
                 <tr>
-                    <th>שם קופה</th>
-                    <th>מספר משטחים</th>
-                    <th>כמות משחקים</th>
-                    <th>הודפס משחקים</th>
-                    <th>הודפס פירוט</th>
-                    <th class="no-print">פעולות</th>
+                    <th style="width: 25%;">שם קופה</th>
+                    <th style="width: 15%;">מספר משטחים</th>
+                    <th style="width: 15%;">כמות משחקים</th>
+                    <th style="width: 20%;">הודפס משחקים</th>
+                    <th style="width: 20%;">הודפס פירוט</th>
+                    <th style="width: 5%;" class="btn-delete-row"></th>
                 </tr>
             </thead>
             <tbody id="tableBody">
@@ -174,56 +196,75 @@
     </div>
 
 <script>
-    // הוספת שורה חדשה
+    // הגדרת יום ברירת מחדל
+    const days = ["ראשון", "שני", "שלישי", "רביעי", "חמישי", "שישי", "שבת"];
+    document.getElementById('dayInput').value = days[new Date().getDay()];
+
+    // פונקציה להוספת שורה
     function addRow() {
         const tbody = document.getElementById('tableBody');
         const row = document.createElement('tr');
         
         row.innerHTML = `
-            <td><input type="text" class="cell-input" placeholder="..."></td>
-            <td><input type="number" class="cell-input" placeholder="0"></td>
-            <td><input type="number" class="cell-input" placeholder="0"></td>
-            <td><input type="text" class="cell-input" placeholder="..."></td>
-            <td><input type="text" class="cell-input" placeholder="..."></td>
-            <td class="no-print"><button style="background:#dc3545; padding:5px 10px;" onclick="this.parentElement.parentElement.remove()">מחק</button></td>
+            <td><input type="text" placeholder="..."></td>
+            <td><input type="number" placeholder="0"></td>
+            <td><input type="number" placeholder="0"></td>
+            <td><input type="text" placeholder="..."></td>
+            <td><input type="text" placeholder="..."></td>
+            <td class="btn-delete-row" style="text-align:center; cursor:pointer; color:red; font-weight:bold;" onclick="removeRow(this)">X</td>
         `;
-        
         tbody.appendChild(row);
     }
 
-    // סינון חיפוש
-    function filterTable() {
-        const input = document.getElementById('searchInput');
-        const filter = input.value.toLowerCase();
-        const rows = document.getElementById('tableBody').getElementsByTagName('tr');
+    // פונקציה למחיקת שורה ספציפית
+    function removeRow(btn) {
+        if(confirm("למחוק שורה זו?")) {
+            btn.parentNode.remove();
+        }
+    }
 
-        for (let i = 0; i < rows.length; i++) {
-            const cells = rows[i].getElementsByTagName('input');
+    // פונקציית חיפוש וסינון
+    function filterTable() {
+        const input = document.getElementById("searchInput");
+        const filter = input.value.toUpperCase();
+        const table = document.getElementById("mainTable");
+        const tr = table.getElementsByTagName("tr");
+
+        // עובר על כל השורות (מדלג על הכותרת שהיא אינדקס 0)
+        for (let i = 1; i < tr.length; i++) {
             let found = false;
-            for (let j = 0; j < cells.length; j++) {
-                if (cells[j].value.toLowerCase().indexOf(filter) > -1) {
+            const inputs = tr[i].getElementsByTagName("input");
+            
+            // בודק בכל התאים בשורה
+            for (let j = 0; j < inputs.length; j++) {
+                if (inputs[j].value.toUpperCase().indexOf(filter) > -1) {
                     found = true;
                     break;
                 }
             }
-            rows[i].style.display = found ? "" : "none";
+            
+            if (found) {
+                tr[i].style.display = "";
+            } else {
+                tr[i].style.display = "none";
+            }
         }
     }
 
-    // ניקוי הכל
-    function clearAll() {
-        if(confirm("למחוק את כל הנתונים בטבלה?")) {
-            document.getElementById('tableBody').innerHTML = '';
+    // ניקוי טבלה
+    function resetTable() {
+        if(confirm("האם לנקות את כל הטבלה?")) {
+            document.getElementById('tableBody').innerHTML = "";
+            for(let i=0; i<5; i++) addRow(); // מחזיר 5 שורות ריקות
+        }
+    }
+
+    // יצירת 5 שורות ראשונות אוטומטית בעת הטעינה
+    window.onload = function() {
+        document.getElementById('dayInput').value = days[new Date().getDay()];
+        for(let i=0; i<10; i++) {
             addRow();
         }
-    }
-
-    // אתחול עם שורה ראשונה
-    window.onload = function() {
-        addRow();
-        // מילוי יום נוכחי אוטומטי
-        const days = ["ראשון", "שני", "שלישי", "רביעי", "חמישי", "שישי", "שבת"];
-        document.getElementById('headerDay').value = days[new Date().getDay()];
     };
 </script>
 
