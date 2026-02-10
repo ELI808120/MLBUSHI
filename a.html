@@ -2,183 +2,232 @@
 <html lang="he" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>דוח קופות להדפסה</title>
+    <title>דוח קופות</title>
     <style>
-        /* --- עיצוב כללי --- */
+        /* --- עיצוב למסך (רגיל) --- */
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 20px;
-            background-color: #f0f2f5;
-            color: #333;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 20px;
+            direction: rtl;
         }
 
-        /* --- אזור כותרות (למעלה) --- */
+        /* כותרת */
         .header-container {
             background: #fff;
             padding: 20px;
             border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
             margin-bottom: 20px;
-            display: flex;
-            gap: 40px;
-            border: 1px solid #ddd;
+            align-items: flex-end;
         }
 
-        .input-group {
-            display: flex;
-            flex-direction: column;
+        .form-group {
+            flex: 1;
+            min-width: 200px;
         }
 
-        .input-group label {
-            font-weight: bold;
+        .form-group label {
+            display: block;
             margin-bottom: 5px;
-            font-size: 14px;
+            font-weight: bold;
+            color: #555;
         }
 
-        .input-group input {
+        .form-group input {
+            width: 100%;
             padding: 8px;
-            font-size: 16px;
-            border: 1px solid #ccc;
+            border: 1px solid #ced4da;
             border-radius: 4px;
-            width: 200px;
+            font-size: 16px;
+            box-sizing: border-box; /* חשוב למניעת גלישה */
         }
 
-        /* --- אזור כפתורים (לא מודפס) --- */
+        /* סרגל כלים */
         .toolbar {
-            background: #e4e6eb;
+            background: #e9ecef;
             padding: 15px;
             border-radius: 8px;
             margin-bottom: 20px;
             display: flex;
-            gap: 10px;
+            flex-wrap: wrap; /* שובר שורות אם אין מקום */
+            gap: 15px;
+            justify-content: space-between;
             align-items: center;
-            border: 1px solid #ccc;
+        }
+
+        .toolbar-buttons {
+            display: flex;
             flex-wrap: wrap;
+            gap: 10px;
         }
 
         button {
             padding: 10px 20px;
-            font-size: 15px;
-            font-weight: bold;
-            color: white;
             border: none;
-            border-radius: 6px;
+            border-radius: 4px;
+            font-size: 14px;
             cursor: pointer;
-            transition: 0.2s;
+            color: white;
+            transition: opacity 0.2s;
         }
 
         button:hover { opacity: 0.9; }
+        
+        .btn-add { background-color: #28a745; }
+        .btn-print { background-color: #007bff; }
+        .btn-clear { background-color: #dc3545; }
 
-        .btn-add { background-color: #28a745; } /* ירוק */
-        .btn-print { background-color: #007bff; } /* כחול */
-        .btn-empty { background-color: #6f42c1; border: 2px solid #5a32a3; } /* סגול - להדפסה ריקה */
-        .btn-reset { background-color: #dc3545; } /* אדום */
-
-        /* --- טבלה --- */
-        .table-wrap {
-            background: #fff;
-            border: 1px solid #ccc;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        /* טבלה */
+        .table-wrapper {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            overflow-x: auto;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
-        }
-
-        th, td {
-            border: 1px solid #bbb;
-            padding: 12px; /* רווח נח לכתיבה */
-            text-align: right;
-            height: 35px; /* גובה שורה קבוע */
+            min-width: 600px; /* מונע כיווץ יתר בנייד */
         }
 
         th {
             background-color: #343a40;
             color: white;
-            -webkit-print-color-adjust: exact;
+            padding: 12px;
+            text-align: right;
+            border-bottom: 2px solid #dee2e6;
         }
 
-        /* שדות קלט בטבלה */
+        td {
+            padding: 0; /* ביטול ריפוד כדי שהאינפוט ימלא את התא */
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        /* עיצוב האינפוטים בתוך הטבלה - נראים רגיל במסך */
         td input {
             width: 100%;
-            height: 100%;
+            padding: 12px;
             border: none;
             outline: none;
-            font-size: 16px;
             background: transparent;
+            font-family: inherit;
+            font-size: 14px;
+            box-sizing: border-box;
         }
 
-        /* --- הגדרות הדפסה --- */
+        td input:focus {
+            background-color: #e8f0fe;
+        }
+
+        /* --- עיצוב להדפסה (קריטי) --- */
         @media print {
-            @page { margin: 10mm; size: A4 landscape; } /* דף לרוחב */
-            
-            body { 
-                background: white; 
-                margin: 0; 
-                -webkit-print-color-adjust: exact; 
+            @page { margin: 1cm; size: A4; }
+
+            /* הסתרת אלמנטים לא רלוונטיים */
+            .toolbar, .no-print, button {
+                display: none !important;
             }
-            
-            .toolbar, .no-print { display: none !important; } /* הסתרת כפתורים */
+
+            body {
+                background: white;
+                padding: 0;
+                color: black;
+            }
 
             .header-container {
                 box-shadow: none;
-                border: none;
                 padding: 0;
-                margin-bottom: 10px;
+                margin-bottom: 30px;
+                border-bottom: 2px solid black;
             }
 
-            .header-container input {
-                border: none;
-                border-bottom: 1px solid #000;
-                width: 150px;
+            .table-wrapper {
+                box-shadow: none;
             }
 
-            .table-wrap { box-shadow: none; border: none; }
+            /* הפיכת הטבלה לשחור לבן וגבולות ברורים */
+            table {
+                border: 1px solid black;
+            }
+
+            th {
+                background-color: #f2f2f2 !important;
+                color: black !important;
+                border: 1px solid black;
+                font-weight: bold;
+            }
+
+            td {
+                border: 1px solid black;
+            }
+
+            /* טריק להעלמת מראה ה"טופס" */
+            input {
+                border: none !important;
+                background: transparent !important;
+                padding: 5px !important;
+                font-size: 12pt !important;
+                height: auto !important;
+            }
+
+            /* הסתרת ה-Placeholder בהדפסה בלבד! */
+            input::placeholder {
+                color: transparent !important;
+                visibility: hidden !important;
+            }
             
-            table { border: 2px solid #000; }
-            th, td { border: 1px solid #000; color: black !important; }
-            th { background-color: #eee !important; color: black !important; }
-            
-            /* הבטחת גובה שורה בהדפסה לכתיבה ידנית */
-            tr { height: 40px; } 
+            /* טיפול באינפוטים של הכותרת */
+            .form-group input {
+                border-bottom: none !important;
+                padding-right: 0 !important;
+            }
         }
     </style>
 </head>
 <body>
 
     <div class="header-container">
-        <div class="input-group">
+        <div class="form-group">
             <label>יום:</label>
-            <input type="text" id="dayInput" placeholder="...">
+            <input type="text" id="dayInput" placeholder="הכנס יום...">
         </div>
-        <div class="input-group">
-            <label>שם:</label>
-            <input type="text" id="nameInput" placeholder="...">
+        <div class="form-group">
+            <label>שם אחראי:</label>
+            <input type="text" placeholder="הכנס שם...">
         </div>
-        <div class="input-group">
-            <label>שם קופה/קו:</label>
-            <input type="text" id="routeInput" placeholder="...">
+        <div class="form-group">
+            <label>קו/אזור:</label>
+            <input type="text" placeholder="הכנס אזור...">
         </div>
     </div>
 
     <div class="toolbar">
-        <button class="btn-empty" onclick="printEmptySheet()">🖨️ הדפס דף ריק למילוי</button>
-        <div style="border-left: 2px solid #ccc; height: 30px; margin: 0 10px;"></div> <button class="btn-add" onclick="addRow()">+ הוסף שורה</button>
-        <button class="btn-print" onclick="window.print()">הדפס מצב נוכחי</button>
-        <button class="btn-reset" onclick="resetAll()">נקה הכל</button>
+        <div>
+            <strong>ניהול קופות</strong>
+        </div>
+        <div class="toolbar-buttons">
+            <button class="btn-add" onclick="addRow()">+ הוסף שורה</button>
+            <button class="btn-print" onclick="window.print()">🖨️ הדפס דוח</button>
+            <button class="btn-clear" onclick="clearTable()">🗑️ נקה הכל</button>
+        </div>
     </div>
 
-    <div class="table-wrap">
+    <div class="table-wrapper">
         <table id="mainTable">
             <thead>
                 <tr>
-                    <th style="width: 25%">שם קופה</th>
-                    <th style="width: 15%">מס' משטחים</th>
-                    <th style="width: 15%">כמות משחקים</th>
-                    <th style="width: 20%">הודפס משחקים</th>
-                    <th style="width: 20%">הודפס פירוט</th>
-                    <th class="no-print" style="width: 50px"></th>
+                    <th style="width: 25%;">שם קופה</th>
+                    <th style="width: 15%;">משטחים</th>
+                    <th style="width: 15%;">כמות משחקים</th>
+                    <th style="width: 20%;">הודפס משחקים</th>
+                    <th style="width: 20%;">הודפס פירוט</th>
+                    <th class="no-print" style="width: 5%;"></th>
                 </tr>
             </thead>
             <tbody id="tableBody">
@@ -186,111 +235,49 @@
         </table>
     </div>
 
-<script>
-    // --- משתנים גלובליים ---
-    const days = ["ראשון", "שני", "שלישי", "רביעי", "חמישי", "שישי", "שבת"];
-
-    // --- אתחול ---
-    window.onload = function() {
-        loadData();
-        // אם אין נתונים, שים יום נוכחי ו-5 שורות
-        if(document.getElementById('tableBody').children.length === 0) {
-            document.getElementById('dayInput').value = days[new Date().getDay()];
-            for(let i=0; i<5; i++) addRow();
-        }
-    };
-
-    // --- הוספת שורה ---
-    function addRow(vals = ['', '', '', '', '']) {
-        const tbody = document.getElementById('tableBody');
-        const row = document.createElement('tr');
-        row.innerHTML = `
-            <td><input type="text" value="${vals[0]}" oninput="saveData()"></td>
-            <td><input type="number" value="${vals[1]}" oninput="saveData()"></td>
-            <td><input type="number" value="${vals[2]}" oninput="saveData()"></td>
-            <td><input type="text" value="${vals[3]}" oninput="saveData()"></td>
-            <td><input type="text" value="${vals[4]}" oninput="saveData()"></td>
-            <td class="no-print" style="text-align:center; cursor:pointer; color:red; font-weight:bold;" onclick="removeRow(this)">X</td>
-        `;
-        tbody.appendChild(row);
-    }
-
-    function removeRow(btn) {
-        btn.parentElement.remove();
-        saveData();
-    }
-
-    // --- שמירה וטעינה ---
-    function saveData() {
-        // שומר רק אם אנחנו לא במצב "דף ריק" (למניעת דריסה)
-        if (sessionStorage.getItem('printingEmpty') === 'true') return;
-
-        const rows = [];
-        document.querySelectorAll('#tableBody tr').forEach(tr => {
-            const inputs = tr.querySelectorAll('input');
-            rows.push([inputs[0].value, inputs[1].value, inputs[2].value, inputs[3].value, inputs[4].value]);
-        });
-        const header = {
-            day: document.getElementById('dayInput').value,
-            name: document.getElementById('nameInput').value,
-            route: document.getElementById('routeInput').value
-        };
-        localStorage.setItem('kobiTable_v3', JSON.stringify({ rows, header }));
-    }
-
-    function loadData() {
-        const data = JSON.parse(localStorage.getItem('kobiTable_v3'));
-        if (data) {
-            document.getElementById('dayInput').value = data.header.day;
-            document.getElementById('nameInput').value = data.header.name;
-            document.getElementById('routeInput').value = data.header.route;
-            data.rows.forEach(r => addRow(r));
-        }
-    }
-
-    // --- הפונקציה המיוחדת להדפסה ריקה ---
-    function printEmptySheet() {
-        if(!confirm("להכין דף ריק (40 שורות) להדפסה?")) return;
-        
-        // 1. שמירת המצב הנוכחי ליתר ביטחון
-        saveData();
-        
-        // 2. סימון שאנחנו במצב הדפסה (כדי לא לשמור בטעות את הריק)
-        sessionStorage.setItem('printingEmpty', 'true');
-
-        // 3. ניקוי הטבלה ויצירת 40 שורות ריקות
-        const tbody = document.getElementById('tableBody');
-        tbody.innerHTML = '';
-        
-        // ניקוי כותרות רק לתצוגה
-        document.getElementById('dayInput').value = ''; 
-        document.getElementById('nameInput').value = ''; 
-        document.getElementById('routeInput').value = ''; 
-
-        for(let i=0; i<40; i++) { // 40 שורות זה בערך דף A4 מלא
+    <script>
+        // יצירת שורה חדשה
+        function addRow() {
+            const tbody = document.getElementById('tableBody');
             const row = document.createElement('tr');
+            
             row.innerHTML = `
-                <td></td><td></td><td></td><td></td><td></td>
-                <td class="no-print"></td>
+                <td><input type="text" placeholder="שם הקופה..."></td>
+                <td><input type="number" placeholder="0"></td>
+                <td><input type="number" placeholder="0"></td>
+                <td><input type="text" placeholder="..."></td>
+                <td><input type="text" placeholder="..."></td>
+                <td class="no-print" style="text-align:center;">
+                    <button onclick="deleteRow(this)" style="background:none; color:red; padding:5px; font-size:16px;">✖</button>
+                </td>
             `;
             tbody.appendChild(row);
         }
 
-        // 4. הדפסה
-        setTimeout(() => {
-            window.print();
-            // 5. רענון הדף כדי להחזיר את הנתונים המקוריים
-            location.reload(); 
-        }, 500);
-    }
-
-    function resetAll() {
-        if(confirm("למחוק הכל?")) {
-            localStorage.removeItem('kobiTable_v3');
-            location.reload();
+        // מחיקת שורה ספציפית
+        function deleteRow(btn) {
+            btn.closest('tr').remove();
         }
-    }
-</script>
+
+        // ניקוי טבלה
+        function clearTable() {
+            if(confirm("האם לנקות את כל הטבלה?")) {
+                document.getElementById('tableBody').innerHTML = '';
+                // הוספת 5 שורות התחלתיות
+                for(let i=0; i<5; i++) addRow();
+            }
+        }
+
+        // אתחול הדף
+        window.onload = function() {
+            // הוספת 5 שורות ריקות להתחלה
+            for(let i=0; i<5; i++) addRow();
+
+            // מילוי יום אוטומטי
+            const days = ["ראשון", "שני", "שלישי", "רביעי", "חמישי", "שישי", "שבת"];
+            document.getElementById('dayInput').value = days[new Date().getDay()];
+        };
+    </script>
 
 </body>
 </html>
