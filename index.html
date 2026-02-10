@@ -2,242 +2,268 @@
 <html lang="he" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>דוח קופות פשוט</title>
+    <title>טבלה נקייה ומודולרית</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: #f4f4f4;
+            margin: 20px;
+            color: #333;
         }
 
-        /* --- עיצוב הכותרות העליונות --- */
-        .header-inputs {
+        /* --- כותרות עליונות --- */
+        .header-controls {
             display: flex;
             gap: 20px;
             margin-bottom: 20px;
-            background: #fff;
+            background: white;
             padding: 15px;
-            border: 1px solid #ccc;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
-        .header-inputs input {
-            font-size: 16px;
-            padding: 5px;
-            border: 1px solid #999;
+        .input-group {
+            display: flex;
+            flex-direction: column;
             width: 200px;
         }
 
-        .header-inputs label {
-            font-weight: bold;
-            margin-left: 5px;
-        }
+        .input-group label { font-size: 12px; font-weight: bold; margin-bottom: 5px; color: #555; }
+        .input-group input { padding: 8px; border: 1px solid #ddd; border-radius: 4px; }
 
-        /* --- עיצוב הטבלה למסך --- */
-        .table-wrapper {
+        /* --- טבלה --- */
+        .table-container {
             background: white;
-            padding: 10px;
-            border: 1px solid #ccc;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            overflow: hidden;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
-            table-layout: fixed; /* שומר על רוחב עמודות קבוע */
+            table-layout: fixed;
         }
 
-        /* כותרות הטבלה */
         th {
-            background-color: #333;
-            color: white;
+            background: #2d3436;
             padding: 0;
-            border: 1px solid #555;
-            height: 40px;
+            border: 1px solid #636e72;
+            height: 45px;
         }
 
-        /* אינפוטים בתוך הכותרת (כדי שתוכל לשנות שמות עמודות) */
+        /* כותרות הניתנות לעריכה */
         th input {
-            background: transparent;
-            color: white;
-            border: none;
-            text-align: center;
-            font-weight: bold;
-            font-size: 14px;
             width: 100%;
             height: 100%;
+            background: transparent;
+            border: none;
+            color: white;
+            text-align: center;
+            font-weight: bold;
+            font-size: 15px;
         }
+        th input:focus { background: #444; outline: none; }
 
-        th input:focus {
-            background: #555;
-            outline: none;
-        }
-
-        /* תאי הטבלה */
         td {
-            border: 1px solid #ccc; /* גבול ברור למסך */
+            border: 1px solid #dfe6e9;
             padding: 0;
-            height: 35px;
+            height: 40px;
+            position: relative;
         }
 
-        /* שורת העיר */
-        tr.city-row td {
-            background-color: #f9f9f9;
-            height: 30px;
-        }
-
-        /* האינפוט עצמו בתוך התא */
+        /* שדות הקלט בטבלה */
         td input {
             width: 100%;
             height: 100%;
             border: none;
-            padding: 0 5px;
-            box-sizing: border-box; /* מונע חריגה */
-            font-size: 14px;
+            padding: 0 10px;
+            box-sizing: border-box;
+            font-size: 15px;
             background: transparent;
         }
+        td input:focus { background-color: #e3f2fd; outline: none; }
 
-        td input:focus {
-            background-color: #e6f7ff; /* צבע תכלת כשלוחצים */
-            outline: none;
+        /* --- מנגנון תת-תפריט (כפתור העיר) --- */
+        .name-cell-wrapper {
+            display: flex;
+            align-items: center;
+            height: 100%;
         }
 
-        .city-input {
-            font-style: italic;
-            color: #555;
-        }
-
-        /* --- כפתורים למטה --- */
-        .controls {
-            margin-top: 20px;
-            text-align: center;
-        }
-
-        button {
-            padding: 10px 20px;
-            font-size: 16px;
+        .toggle-city-btn {
             cursor: pointer;
-            margin: 0 5px;
+            padding: 0 10px;
+            color: #b2bec3;
+            font-size: 18px;
+            user-select: none;
+            transition: color 0.2s;
         }
+
+        .toggle-city-btn:hover { color: #0984e3; }
+        .toggle-city-btn.active { color: #0984e3; }
+
+        /* --- שורת העיר (מוסתרת כברירת מחדל) --- */
+        .city-row {
+            display: none; /* הסוד לניקיון */
+            background-color: #f8f9fa;
+        }
+        
+        .city-row.visible {
+            display: table-row; /* מוצג רק כשלוחצים */
+        }
+
+        .city-row td {
+            border-top: 1px dashed #b2bec3;
+            padding-right: 40px; /* הזחה פנימה */
+        }
+
+        /* --- כפתורים --- */
+        .toolbar {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        button.action-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            color: white;
+        }
+        .btn-add { background: #00b894; }
+        .btn-print { background: #0984e3; }
+        .btn-clear { background: #d63031; }
 
         /* --- הדפסה --- */
         @media print {
-            @page { margin: 10mm; size: A4; }
-            body { background: white; margin: 0; }
-            .controls, .btn-remove, .no-print { display: none !important; }
+            @page { size: A4; margin: 10mm; }
+            body { margin: 0; background: white; }
+            .toolbar, .header-controls, .toggle-city-btn, .no-print { display: none !important; }
             
-            .header-inputs { border: none; padding: 0; margin-bottom: 10px; }
-            .header-inputs input { border: none; border-bottom: 1px solid black; width: auto; }
+            .table-container { box-shadow: none; }
+            table, th, td { border: 1px solid black !important; }
             
-            .table-wrapper { border: none; padding: 0; }
+            th { background: #eee !important; color: black !important; }
+            th input { color: black !important; font-weight: 800; }
             
-            table, th, td {
-                border: 1px solid black !important; /* גבול שחור דק ומקצועי */
-            }
-
-            th { background-color: #eee !important; color: black !important; -webkit-print-color-adjust: exact; }
-            th input { color: black !important; }
-
-            /* ביטול הפרדה ויזואלית בין שורה ראשית לעיר בהדפסה למראה נקי */
-            tr.main-row td { border-bottom: none !important; }
-            tr.city-row td { border-top: none !important; }
-
-            input { font-size: 12pt; }
+            /* אם שורת עיר פתוחה - היא תודפס. אם סגורה - היא לא תתפוס מקום */
+            .city-row.visible td { border-top: none !important; }
+            .main-row td { border-bottom: none !important; } /* איחוד ויזואלי אם העיר פתוחה */
         }
     </style>
 </head>
 <body>
 
-    <div class="header-inputs">
-        <div>
-            <label>יום/תאריך:</label>
+    <div class="header-controls">
+        <div class="input-group">
+            <label>תאריך / יום:</label>
             <input type="text">
         </div>
-        <div>
+        <div class="input-group">
             <label>שם אחראי:</label>
             <input type="text">
         </div>
-        <div>
-            <label>קו:</label>
+        <div class="input-group">
+            <label>קו / מסלול:</label>
             <input type="text">
         </div>
     </div>
 
-    <div class="table-wrapper">
-        <table id="myTable">
+    <div class="table-container">
+        <table id="dataTable">
             <thead>
                 <tr>
-                    <th width="20%"><input type="text" value="שם הקופה"></th>
-                    <th width="15%"><input type="text" value="משטחים"></th>
-                    <th width="15%"><input type="text" value="כמות משחקים"></th>
-                    <th width="20%"><input type="text" value="הודפס"></th>
-                    <th width="20%"><input type="text" value="הערות"></th>
-                    <th width="5%" class="no-print"></th> </tr>
+                    <th style="width: 25%"><input type="text" value="שם הקופה"></th>
+                    <th style="width: 15%"><input type="text" value="משטחים"></th>
+                    <th style="width: 15%"><input type="text" value="כמות"></th>
+                    <th style="width: 20%"><input type="text" value="הערות א'"></th>
+                    <th style="width: 20%"><input type="text" value="הערות ב'"></th>
+                    <th class="no-print" style="width: 40px;"></th>
+                </tr>
             </thead>
             <tbody id="tableBody">
                 </tbody>
         </table>
     </div>
 
-    <div class="controls">
-        <button onclick="addRow()">+ הוסף שורה</button>
-        <button onclick="window.print()" style="background: #007bff; color: white; border: none;">🖨️ הדפס דף</button>
-        <button onclick="resetTable()" style="background: #dc3545; color: white; border: none;">נקה הכל</button>
+    <div class="toolbar">
+        <button class="action-btn btn-add" onclick="addRow()">+ הוסף שורה</button>
+        <button class="action-btn btn-print" onclick="window.print()">🖨️ הדפס</button>
+        <button class="action-btn btn-clear" onclick="resetTable()">🗑️ נקה הכל</button>
     </div>
 
 <script>
-    // פונקציה להוספת שורה כפולה (ראשית + עיר)
     function addRow() {
         const tbody = document.getElementById('tableBody');
+        const rowId = 'row-' + Date.now() + Math.random().toString(36).substr(2, 9); // מזהה ייחודי לכל שורה
+
+        // בניית ה-HTML של צמד השורות
+        const html = `
+            <tr class="main-row">
+                <td>
+                    <div class="name-cell-wrapper">
+                        <span class="toggle-city-btn" onclick="toggleCity('${rowId}', this)" title="הוסף עיר/פירוט">📍</span>
+                        <input type="text">
+                    </div>
+                </td>
+                <td><input type="text" style="text-align:center;"></td>
+                <td><input type="text" style="text-align:center;"></td>
+                <td><input type="text"></td>
+                <td><input type="text"></td>
+                <td class="no-print" style="text-align:center;">
+                    <span onclick="removeRow(this)" style="cursor:pointer; color:red; font-weight:bold;">✖</span>
+                </td>
+            </tr>
+            <tr id="${rowId}" class="city-row">
+                <td colspan="5">
+                    <input type="text" placeholder="" style="font-style: italic;">
+                </td>
+                <td class="no-print"></td>
+            </tr>
+        `;
         
-        // יצירת שורה ראשית
-        const trMain = document.createElement('tr');
-        trMain.className = 'main-row';
-        trMain.innerHTML = `
-            <td><input type="text"></td>
-            <td><input type="text" style="text-align:center;"></td>
-            <td><input type="text" style="text-align:center;"></td>
-            <td><input type="text"></td>
-            <td><input type="text"></td>
-            <td class="no-print" style="text-align:center; background:#fff;">
-                <button class="btn-remove" onclick="removeEntry(this)" style="color:red; border:none; background:none; font-weight:bold;">X</button>
-            </td>
-        `;
-
-        // יצירת שורת עיר
-        const trCity = document.createElement('tr');
-        trCity.className = 'city-row';
-        trCity.innerHTML = `
-            <td colspan="5">
-                <input type="text" class="city-input" placeholder="פרטי עיר / כתובת (הקלד כאן)...">
-            </td>
-            <td class="no-print" style="border-left:none; border-bottom:none;"></td>
-        `;
-
-        tbody.appendChild(trMain);
-        tbody.appendChild(trCity);
+        // טריק להוספת HTML כמחרוזת
+        const template = document.createElement('template');
+        template.innerHTML = html.trim();
+        tbody.appendChild(template.content.cloneNode(true));
     }
 
-    // מחיקת צמד שורות
-    function removeEntry(btn) {
-        const trMain = btn.closest('tr');
-        const trCity = trMain.nextElementSibling; // שורת העיר שתמיד באה אחרי
-        trMain.remove();
-        if(trCity && trCity.classList.contains('city-row')) {
-            trCity.remove();
+    // פונקציה לפתיחה/סגירה של שורת עיר
+    function toggleCity(rowId, btn) {
+        const cityRow = document.getElementById(rowId);
+        
+        if (cityRow.classList.contains('visible')) {
+            cityRow.classList.remove('visible');
+            btn.classList.remove('active');
+            btn.style.color = "#b2bec3"; // אפור
+        } else {
+            cityRow.classList.add('visible');
+            btn.classList.add('active');
+            btn.style.color = "#0984e3"; // כחול
+            
+            // פוקוס אוטומטי לשדה העיר כשפותחים
+            cityRow.querySelector('input').focus();
         }
     }
 
-    // איפוס והכנה
+    function removeRow(btn) {
+        const row = btn.closest('tr');
+        const cityRow = row.nextElementSibling;
+        row.remove();
+        if(cityRow) cityRow.remove();
+    }
+
     function resetTable() {
         document.getElementById('tableBody').innerHTML = '';
-        // יוצר 12 שורות ברירת מחדל (מתאים לדף A4)
-        for(let i=0; i<12; i++) {
-            addRow();
-        }
+        for(let i=0; i<15; i++) addRow(); // 15 שורות לדף מלא
     }
 
-    // הפעלה ראשונית
+    // אתחול
     window.onload = resetTable;
-
 </script>
 
 </body>
