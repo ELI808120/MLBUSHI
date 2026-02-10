@@ -2,187 +2,291 @@
 <html lang="he" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>טבלה נקייה ומודולרית</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>מערכת ניהול קופות - מהדורת אופנה</title>
     <style>
+        /* --- משתנים ועיצוב אופנה --- */
+        :root {
+            --primary: #1a2a6c; /* כחול עמוק - חליפות */
+            --gold: #b21f1f; /* צבע אדום יין / בורדו יוקרתי */
+            --accent: #fdbb2d; /* זהב */
+            --bg: #fdfbf7; /* צבע שמנת/בד */
+            --text: #2c3e50;
+        }
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f4f4f4;
-            margin: 20px;
-            color: #333;
+            font-family: 'Segoe UI', 'Playfair Display', serif;
+            background-color: var(--bg);
+            background-image: radial-gradient(#e0e0e0 1px, transparent 1px);
+            background-size: 20px 20px;
+            margin: 0;
+            padding: 20px;
+            color: var(--text);
         }
 
-        /* --- כותרות עליונות --- */
-        .header-controls {
+        /* --- כותרת ראשית עם איור --- */
+        .fashion-header {
+            background: linear-gradient(135deg, #1a2a6c 0%, #b21f1f 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 25px;
             display: flex;
-            gap: 20px;
-            margin-bottom: 20px;
-            background: white;
-            padding: 15px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            justify-content: space-between;
+            align-items: center;
         }
 
-        .input-group {
-            display: flex;
-            flex-direction: column;
+        /* איור קולב/אופנה ברקע */
+        .fashion-header::before {
+            content: '';
+            position: absolute;
+            left: -20px;
+            bottom: -20px;
             width: 200px;
+            height: 200px;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.1)' stroke-width='1' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20.38 3.4a2 2 0 0 0-2-1.7h-3.28a2 2 0 0 1-1.7-1 2 2 0 0 0-3.4 0 2 2 0 0 1-1.7 1H5.62a2 2 0 0 0-2 1.7l1.7 8.6a2 2 0 0 0 2 1.6h9.36a2 2 0 0 0 2-1.6l1.7-8.6z'/%3E%3Cpath d='M16 12l2.3 10a2 2 0 0 1-2 2.4l-1.9.4a2 2 0 0 1-2.2-1.6L9 12'/%3E%3Cpath d='M8 12L5.7 22a2 2 0 0 0 2 2.4l1.9.4a2 2 0 0 0 2.2-1.6L15 12'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-size: contain;
+            transform: rotate(-15deg);
         }
 
-        .input-group label { font-size: 12px; font-weight: bold; margin-bottom: 5px; color: #555; }
-        .input-group input { padding: 8px; border: 1px solid #ddd; border-radius: 4px; }
+        .header-content h1 { margin: 0; font-size: 2rem; font-weight: normal; font-family: 'Playfair Display', serif; letter-spacing: 1px; }
+        .header-content p { margin: 5px 0 0; opacity: 0.8; font-size: 0.9rem; }
 
-        /* --- טבלה --- */
-        .table-container {
+        /* כפתור הגדרות */
+        .settings-btn {
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.4);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            backdrop-filter: blur(5px);
+            transition: 0.3s;
+        }
+        .settings-btn:hover { background: white; color: var(--primary); }
+
+        /* --- פאנל ניהול (מוסתר) --- */
+        #adminPanel {
+            display: none;
             background: white;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            border-radius: 8px;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+            border-left: 5px solid var(--gold);
+        }
+
+        .admin-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
+        .admin-grid input { padding: 10px; border: 1px solid #ddd; border-radius: 5px; width: 100%; box-sizing: border-box; }
+
+        /* --- טבלה ראשית --- */
+        .table-card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+            padding: 5px;
             overflow: hidden;
         }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            table-layout: fixed;
-        }
+        table { width: 100%; border-collapse: collapse; }
 
         th {
-            background: #2d3436;
-            padding: 0;
-            border: 1px solid #636e72;
-            height: 45px;
-        }
-
-        /* כותרות הניתנות לעריכה */
-        th input {
-            width: 100%;
-            height: 100%;
-            background: transparent;
-            border: none;
+            background: #2c3e50;
             color: white;
-            text-align: center;
-            font-weight: bold;
-            font-size: 15px;
+            padding: 15px;
+            font-weight: normal;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 0.9rem;
+            border-bottom: 3px solid var(--gold);
         }
-        th input:focus { background: #444; outline: none; }
 
         td {
-            border: 1px solid #dfe6e9;
-            padding: 0;
-            height: 40px;
+            border-bottom: 1px solid #eee;
+            height: 50px; /* גובה קבוע לדף מלא */
             position: relative;
+            transition: background 0.2s;
         }
 
-        /* שדות הקלט בטבלה */
+        tr:hover td { background-color: #fcfcfc; }
+
+        /* שדות בטבלה */
         td input {
-            width: 100%;
-            height: 100%;
-            border: none;
-            padding: 0 10px;
-            box-sizing: border-box;
-            font-size: 15px;
-            background: transparent;
-        }
-        td input:focus { background-color: #e3f2fd; outline: none; }
-
-        /* --- מנגנון תת-תפריט (כפתור העיר) --- */
-        .name-cell-wrapper {
-            display: flex;
-            align-items: center;
-            height: 100%;
+            width: 100%; height: 100%; border: none; background: transparent;
+            text-align: center; font-size: 1rem; color: #333; outline: none;
         }
 
-        .toggle-city-btn {
+        /* עיצוב מיוחד לעמודת השם */
+        .name-cell {
             cursor: pointer;
             padding: 0 10px;
-            color: #b2bec3;
-            font-size: 18px;
-            user-select: none;
-            transition: color 0.2s;
-        }
-
-        .toggle-city-btn:hover { color: #0984e3; }
-        .toggle-city-btn.active { color: #0984e3; }
-
-        /* --- שורת העיר (מוסתרת כברירת מחדל) --- */
-        .city-row {
-            display: none; /* הסוד לניקיון */
-            background-color: #f8f9fa;
-        }
-        
-        .city-row.visible {
-            display: table-row; /* מוצג רק כשלוחצים */
-        }
-
-        .city-row td {
-            border-top: 1px dashed #b2bec3;
-            padding-right: 40px; /* הזחה פנימה */
-        }
-
-        /* --- כפתורים --- */
-        .toolbar {
-            margin-top: 20px;
             display: flex;
+            flex-direction: column;
             justify-content: center;
-            gap: 10px;
+            line-height: 1.2;
         }
+        .name-main { font-weight: bold; color: var(--primary); }
+        .name-city { font-size: 0.8rem; color: #7f8c8d; font-style: italic; }
         
-        button.action-btn {
-            padding: 10px 20px;
+        /* אינדיקציה ללחיצה */
+        .name-cell:hover::after {
+            content: '✎ ערוך';
+            position: absolute;
+            left: 5px;
+            font-size: 0.7rem;
+            color: var(--gold);
+            opacity: 0.7;
+        }
+
+        /* --- חלון קופץ (Modal) --- */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            backdrop-filter: blur(3px);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-box {
+            background: white;
+            padding: 30px;
+            width: 350px;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            text-align: center;
+            position: relative;
+            border-top: 5px solid var(--primary);
+        }
+
+        .modal-box h3 { margin-top: 0; color: var(--primary); font-family: 'Playfair Display', serif; }
+        
+        .modal-input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 2px solid #eee;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 1rem;
+            transition: 0.3s;
+        }
+        .modal-input:focus { border-color: var(--gold); outline: none; }
+
+        .modal-btn {
+            background: linear-gradient(to right, var(--primary), #2c3e50);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 1rem;
+            cursor: pointer;
+            margin-top: 15px;
+            width: 100%;
+            font-weight: bold;
+        }
+
+        /* --- כפתורים למטה --- */
+        .action-bar {
+            margin-top: 20px;
+            text-align: center;
+        }
+        .btn-print {
+            background: var(--text);
+            color: white;
+            padding: 12px 40px;
             border: none;
             border-radius: 5px;
+            font-size: 1.1rem;
             cursor: pointer;
-            font-weight: bold;
-            color: white;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
         }
-        .btn-add { background: #00b894; }
-        .btn-print { background: #0984e3; }
-        .btn-clear { background: #d63031; }
+        .btn-print:hover { transform: translateY(-2px); }
 
-        /* --- הדפסה --- */
+        /* --- הדפסה (A4 מושלם) --- */
         @media print {
             @page { size: A4; margin: 10mm; }
-            body { margin: 0; background: white; }
-            .toolbar, .header-controls, .toggle-city-btn, .no-print { display: none !important; }
+            body { background: white; padding: 0; margin: 0; -webkit-print-color-adjust: exact; }
             
-            .table-container { box-shadow: none; }
-            table, th, td { border: 1px solid black !important; }
+            .fashion-header, .settings-btn, .action-bar, .modal-overlay, #adminPanel { display: none !important; }
+            .name-cell:hover::after { display: none; }
+
+            /* כותרת מותאמת להדפסה */
+            .print-header {
+                display: block !important;
+                text-align: center;
+                margin-bottom: 20px;
+                border-bottom: 2px solid black;
+                padding-bottom: 10px;
+            }
+
+            .table-card { box-shadow: none; border-radius: 0; padding: 0; }
             
-            th { background: #eee !important; color: black !important; }
-            th input { color: black !important; font-weight: 800; }
+            table { border: 2px solid black; }
+            th { background: #eee !important; color: black !important; border: 1px solid black; font-weight: bold; }
+            td { border: 1px solid black; height: 35px; } /* גובה מותאם ל-A4 */
             
-            /* אם שורת עיר פתוחה - היא תודפס. אם סגורה - היא לא תתפוס מקום */
-            .city-row.visible td { border-top: none !important; }
-            .main-row td { border-bottom: none !important; } /* איחוד ויזואלי אם העיר פתוחה */
+            /* טקסט בטבלה */
+            input { font-size: 12pt; color: black; font-weight: 500; }
+            .name-city { color: black; }
         }
+        
+        .print-header { display: none; } /* מוסתר במסך */
     </style>
 </head>
 <body>
 
-    <div class="header-controls">
-        <div class="input-group">
-            <label>תאריך / יום:</label>
-            <input type="text">
+    <div class="fashion-header">
+        <div class="header-content">
+            <h1>ניהול מלאי ומשחקים</h1>
+            <p>מערכת בקרת קופות והדפסות</p>
         </div>
-        <div class="input-group">
-            <label>שם אחראי:</label>
-            <input type="text">
-        </div>
-        <div class="input-group">
-            <label>קו / מסלול:</label>
-            <input type="text">
+        <button class="settings-btn" onclick="toggleAdmin()">⚙️ הגדרות ניהול</button>
+    </div>
+
+    <div id="adminPanel">
+        <div class="admin-grid">
+            <div>
+                <label>תאריך לדוח:</label>
+                <input type="text" id="dateInput" placeholder="היום...">
+            </div>
+            <div>
+                <label>שם מנהל/אחראי:</label>
+                <input type="text" id="managerInput" placeholder="שם...">
+            </div>
+            <div>
+                <label>כותרת הדפסה:</label>
+                <input type="text" id="printTitleInput" value="דוח סיכום קופות">
+            </div>
         </div>
     </div>
 
-    <div class="table-container">
-        <table id="dataTable">
+    <div class="print-header">
+        <h2 id="printTitleDisplay">דוח סיכום קופות</h2>
+        <div style="display:flex; justify-content:space-between; margin-top:10px;">
+            <span id="printDate"></span>
+            <span id="printManager"></span>
+        </div>
+    </div>
+
+    <div class="table-card">
+        <table id="mainTable">
             <thead>
                 <tr>
-                    <th style="width: 25%"><input type="text" value="שם הקופה"></th>
-                    <th style="width: 15%"><input type="text" value="משטחים"></th>
-                    <th style="width: 15%"><input type="text" value="כמות"></th>
-                    <th style="width: 20%"><input type="text" value="הערות א'"></th>
-                    <th style="width: 20%"><input type="text" value="הערות ב'"></th>
-                    <th class="no-print" style="width: 40px;"></th>
+                    <th style="width:30%">שם קופה</th>
+                    <th style="width:15%">מספר משטחים</th>
+                    <th style="width:15%">כמות משחקים</th>
+                    <th style="width:20%">הודפס משחקים</th>
+                    <th style="width:20%">הודפס פירוט</th>
                 </tr>
             </thead>
             <tbody id="tableBody">
@@ -190,80 +294,115 @@
         </table>
     </div>
 
-    <div class="toolbar">
-        <button class="action-btn btn-add" onclick="addRow()">+ הוסף שורה</button>
-        <button class="action-btn btn-print" onclick="window.print()">🖨️ הדפס</button>
-        <button class="action-btn btn-clear" onclick="resetTable()">🗑️ נקה הכל</button>
+    <div class="action-bar">
+        <button class="btn-print" onclick="prepareAndPrint()">🖨️ הדפס דף מלא (A4)</button>
+        <button style="background:none; border:none; color:#7f8c8d; cursor:pointer; margin-right:15px;" onclick="resetTable()">נקה הכל</button>
+    </div>
+
+    <div class="modal-overlay" id="entryModal">
+        <div class="modal-box">
+            <h3>פרטי קופה</h3>
+            <p style="color:#7f8c8d; font-size:0.9rem; margin-bottom:20px;">הזן את שם הקופה ואת העיר אליה היא שייכת</p>
+            
+            <input type="text" id="modalName" class="modal-input" placeholder="שם הקופה (לדוגמה: קופה ראשית)">
+            <input type="text" id="modalCity" class="modal-input" placeholder="שם העיר (לדוגמה: ירושלים)">
+            
+            <button class="modal-btn" onclick="saveModalData()">שמור ועדכן</button>
+            <button style="background:none; border:none; color:#999; margin-top:10px; cursor:pointer;" onclick="closeModal()">ביטול</button>
+        </div>
     </div>
 
 <script>
-    function addRow() {
-        const tbody = document.getElementById('tableBody');
-        const rowId = 'row-' + Date.now() + Math.random().toString(36).substr(2, 9); // מזהה ייחודי לכל שורה
+    let currentRowIndex = null;
+    const TOTAL_ROWS = 20; // מספר שורות שמתאים בדיוק ל-A4
 
-        // בניית ה-HTML של צמד השורות
-        const html = `
-            <tr class="main-row">
-                <td>
-                    <div class="name-cell-wrapper">
-                        <span class="toggle-city-btn" onclick="toggleCity('${rowId}', this)" title="הוסף עיר/פירוט">📍</span>
-                        <input type="text">
+    // 1. אתחול הטבלה
+    function initTable() {
+        const tbody = document.getElementById('tableBody');
+        tbody.innerHTML = '';
+
+        for (let i = 0; i < TOTAL_ROWS; i++) {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td onclick="openModal(${i})">
+                    <div class="name-cell" id="cell-name-${i}">
+                        <span class="name-main"></span>
+                        <span class="name-city"></span>
                     </div>
                 </td>
-                <td><input type="text" style="text-align:center;"></td>
-                <td><input type="text" style="text-align:center;"></td>
-                <td><input type="text"></td>
-                <td><input type="text"></td>
-                <td class="no-print" style="text-align:center;">
-                    <span onclick="removeRow(this)" style="cursor:pointer; color:red; font-weight:bold;">✖</span>
-                </td>
-            </tr>
-            <tr id="${rowId}" class="city-row">
-                <td colspan="5">
-                    <input type="text" placeholder="" style="font-style: italic;">
-                </td>
-                <td class="no-print"></td>
-            </tr>
-        `;
-        
-        // טריק להוספת HTML כמחרוזת
-        const template = document.createElement('template');
-        template.innerHTML = html.trim();
-        tbody.appendChild(template.content.cloneNode(true));
-    }
-
-    // פונקציה לפתיחה/סגירה של שורת עיר
-    function toggleCity(rowId, btn) {
-        const cityRow = document.getElementById(rowId);
-        
-        if (cityRow.classList.contains('visible')) {
-            cityRow.classList.remove('visible');
-            btn.classList.remove('active');
-            btn.style.color = "#b2bec3"; // אפור
-        } else {
-            cityRow.classList.add('visible');
-            btn.classList.add('active');
-            btn.style.color = "#0984e3"; // כחול
-            
-            // פוקוס אוטומטי לשדה העיר כשפותחים
-            cityRow.querySelector('input').focus();
+                <td><input type="number" placeholder=""></td>
+                <td><input type="number" placeholder=""></td>
+                <td><input type="text" placeholder=""></td>
+                <td><input type="text" placeholder=""></td>
+            `;
+            tbody.appendChild(tr);
         }
+
+        // תאריך אוטומטי
+        const d = new Date();
+        document.getElementById('dateInput').value = d.toLocaleDateString('he-IL');
     }
 
-    function removeRow(btn) {
-        const row = btn.closest('tr');
-        const cityRow = row.nextElementSibling;
-        row.remove();
-        if(cityRow) cityRow.remove();
+    // 2. לוגיקה של המודאל (החלון הקופץ)
+    function openModal(index) {
+        currentRowIndex = index;
+        const nameSpan = document.querySelector(`#cell-name-${index} .name-main`);
+        const citySpan = document.querySelector(`#cell-name-${index} .name-city`);
+        
+        // טעינת נתונים קיימים למודאל
+        document.getElementById('modalName').value = nameSpan.innerText;
+        document.getElementById('modalCity').value = citySpan.innerText;
+        
+        document.getElementById('entryModal').style.display = 'flex';
+        document.getElementById('modalName').focus();
+    }
+
+    function closeModal() {
+        document.getElementById('entryModal').style.display = 'none';
+        currentRowIndex = null;
+    }
+
+    function saveModalData() {
+        if (currentRowIndex === null) return;
+
+        const name = document.getElementById('modalName').value;
+        const city = document.getElementById('modalCity').value;
+
+        const cell = document.getElementById(`cell-name-${currentRowIndex}`);
+        cell.querySelector('.name-main').innerText = name;
+        cell.querySelector('.name-city').innerText = city;
+
+        closeModal();
+    }
+
+    // סגירה בלחיצה על ENTER
+    document.getElementById('modalCity').addEventListener('keypress', function (e) {
+        if (e.key === 'Enter') saveModalData();
+    });
+
+    // 3. ניהול הגדרות
+    function toggleAdmin() {
+        const panel = document.getElementById('adminPanel');
+        panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
+    }
+
+    // 4. הדפסה
+    function prepareAndPrint() {
+        // העברת נתונים לכותרת הדפסה
+        document.getElementById('printTitleDisplay').innerText = document.getElementById('printTitleInput').value;
+        document.getElementById('printDate').innerText = "תאריך: " + document.getElementById('dateInput').value;
+        document.getElementById('printManager').innerText = "אחראי: " + document.getElementById('managerInput').value;
+        
+        window.print();
     }
 
     function resetTable() {
-        document.getElementById('tableBody').innerHTML = '';
-        for(let i=0; i<15; i++) addRow(); // 15 שורות לדף מלא
+        if(confirm("לנקות את כל הנתונים?")) initTable();
     }
 
-    // אתחול
-    window.onload = resetTable;
+    // הפעלה
+    window.onload = initTable;
+
 </script>
 
 </body>
