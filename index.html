@@ -9,6 +9,7 @@
         :root {
             --primary: #1a2a6c;
             --gold: #c5a059;
+            --green: #28a745; /* צבע לכפתורי הוספה */
             --border-on-screen: #dcdcdc;
         }
 
@@ -111,7 +112,34 @@
 
         .text-col input { text-align: right; padding-right: 10px; font-weight: 500; }
 
-        /* --- כפתורים --- */
+        /* --- כפתורי הוספת שורות --- */
+        .edit-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 15px;
+            padding: 10px;
+            background: rgba(255,255,255,0.5);
+            border-radius: 8px;
+        }
+
+        .btn-add {
+            background-color: var(--green);
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 5px;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .btn-add:hover { background-color: #218838; }
+
+        /* --- כפתורי הדפסה --- */
         .buttons-area {
             display: flex;
             justify-content: center;
@@ -142,16 +170,16 @@
                 background: white; 
                 margin: 0; 
                 padding: 0; 
-                -webkit-print-color-adjust: exact; /* שומר על צבעים */
+                -webkit-print-color-adjust: exact;
             }
             
-            .fashion-header, .buttons-area, .admin-panel { display: none !important; }
+            /* הסתרת אלמנטים לא רצויים בהדפסה */
+            .fashion-header, .buttons-area, .admin-panel, .edit-buttons { display: none !important; }
 
-            /* הצגת כותרת הדפסה */
             .print-only-header {
                 display: block !important;
                 text-align: center;
-                margin-bottom: 10px; /* צומצם כדי לחסוך מקום */
+                margin-bottom: 10px;
                 border-bottom: 2px solid black;
                 padding-bottom: 5px;
             }
@@ -167,19 +195,17 @@
             th { 
                 background: #eee !important; 
                 color: black !important; 
-                padding: 5px !important; /* צמצום רווח בכותרת */
+                padding: 5px !important;
                 font-size: 1rem !important;
             }
             
-            /* --- התיקון המרכזי: הקטנת שורות בהדפסה --- */
             td {
-                height: 32px !important; /* גובה מוקטן במיוחד להדפסה */
-                font-size: 0.9rem !important; /* פונט מעט קטן יותר */
+                height: 32px !important; /* גובה מוקטן להדפסה */
+                font-size: 0.9rem !important;
             }
 
             input { color: black !important; font-weight: 500; }
 
-            /* הסתרת ה-Placeholder בהדפסה */
             input::placeholder { color: transparent !important; opacity: 0; }
             ::-webkit-input-placeholder { color: transparent !important; opacity: 0; }
             ::-moz-placeholder { color: transparent !important; opacity: 0; }
@@ -230,19 +256,22 @@
         </table>
     </div>
 
+    <div class="edit-buttons">
+        <button class="btn-add" onclick="addRows(1)">➕ הוסף שורה אחת</button>
+        <button class="btn-add" onclick="addRows(10)">➕➕ הוסף 10 שורות</button>
+    </div>
+
     <div class="buttons-area">
         <button class="btn-print" onclick="printReport('portrait')">🖨️ הדפס לאורך (רגיל)</button>
         <button class="btn-print btn-landscape" onclick="printReport('landscape')">📏 הדפס לרוחב (Landscape)</button>
     </div>
 
 <script>
-    const ROWS_COUNT = 18;
+    const INITIAL_ROWS = 18;
 
-    function init() {
+    function addRows(count) {
         const tbody = document.getElementById('tableBody');
-        tbody.innerHTML = '';
-
-        for(let i=0; i<ROWS_COUNT; i++) {
+        for(let i=0; i<count; i++) {
             const tr = document.createElement('tr');
             tr.innerHTML = `
                 <td class="text-col"><input type="text" placeholder="שם הקופה..."></td>
@@ -252,6 +281,14 @@
             `;
             tbody.appendChild(tr);
         }
+    }
+
+    function init() {
+        const tbody = document.getElementById('tableBody');
+        tbody.innerHTML = '';
+        
+        // יצירת 18 שורות ראשוניות
+        addRows(INITIAL_ROWS);
 
         const d = new Date();
         document.getElementById('dateInput').value = d.toLocaleDateString('he-IL');
@@ -262,14 +299,12 @@
         document.getElementById('printDateDisplay').innerText = "תאריך: " + document.getElementById('dateInput').value;
         document.getElementById('printManagerDisplay').innerText = "אחראי: " + document.getElementById('managerInput').value;
 
-        // הסרת סטייל קודם אם קיים
         const oldStyle = document.getElementById('print-orientation-style');
         if (oldStyle) oldStyle.remove();
 
         const style = document.createElement('style');
         style.id = 'print-orientation-style';
         
-        // הגדרת שוליים מעט צרים יותר (5mm) כדי להבטיח התאמה
         if (orientation === 'landscape') {
             style.innerHTML = '@page { size: A4 landscape; margin: 10mm 10mm 10mm 10mm; }';
         } else {
@@ -278,7 +313,6 @@
 
         document.head.appendChild(style);
         
-        // השהיה קצרה מאוד כדי לוודא שהסטייל נתפס לפני הפקודה
         setTimeout(() => {
             window.print();
         }, 100);
