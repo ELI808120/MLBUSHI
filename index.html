@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>מערכת ניהול - גרסה ממוקדת</title>
+    <title>מערכת ניהול - להדפסה נקייה</title>
     <style>
         /* --- עיצוב בסיסי --- */
         :root {
@@ -109,10 +109,9 @@
 
         td input:focus { background: #eef; }
 
-        /* הדגשה לעמודות טקסט */
         .text-col input { text-align: right; padding-right: 10px; font-weight: 500; }
 
-        /* --- אזור כפתורים --- */
+        /* --- כפתורים --- */
         .buttons-area {
             display: flex;
             justify-content: center;
@@ -135,15 +134,14 @@
         .btn-print:hover { transform: translateY(-2px); background: #444; }
         .btn-landscape { background: var(--primary); }
 
-        /* --- הדפסה --- */
+        /* --- הגדרות הדפסה קריטיות --- */
         .print-only-header { display: none; }
 
         @media print {
-            @page { margin: 10mm; } /* גודל הדף נקבע דינמית ב-JS */
-            
             body { background: white; margin: 0; padding: 0; }
             .fashion-header, .buttons-area, .admin-panel { display: none !important; }
 
+            /* הצגת כותרת הדפסה */
             .print-only-header {
                 display: block !important;
                 text-align: center;
@@ -160,6 +158,20 @@
 
             th { background: #eee !important; color: black !important; }
             input { color: black !important; font-weight: 500; }
+
+            /* --- התיקון שביקשת: הסתרת ה-Placeholder בהדפסה --- */
+            input::placeholder {
+                color: transparent !important;
+                opacity: 0;
+            }
+            ::-webkit-input-placeholder { /* Chrome/Safari/Edge */
+                color: transparent !important;
+                opacity: 0;
+            }
+            ::-moz-placeholder { /* Firefox */
+                color: transparent !important;
+                opacity: 0;
+            }
         }
     </style>
 </head>
@@ -213,17 +225,14 @@
     </div>
 
 <script>
-    const ROWS_COUNT = 18; // מתאים בול לעמוד A4
+    const ROWS_COUNT = 18;
 
     function init() {
         const tbody = document.getElementById('tableBody');
         tbody.innerHTML = '';
 
-        // יצירת שורות
         for(let i=0; i<ROWS_COUNT; i++) {
             const tr = document.createElement('tr');
-            
-            // 4 עמודות פשוטות
             tr.innerHTML = `
                 <td class="text-col"><input type="text" placeholder="שם הקופה..."></td>
                 <td class="text-col"><input type="text" placeholder="עיר..."></td>
@@ -233,37 +242,30 @@
             tbody.appendChild(tr);
         }
 
-        // תאריך אוטומטי
         const d = new Date();
         document.getElementById('dateInput').value = d.toLocaleDateString('he-IL');
     }
 
-    // פונקציית הדפסה חכמה
     function printReport(orientation) {
-        // 1. עדכון כותרות להדפסה
         document.getElementById('printTitleDisplay').innerText = document.getElementById('reportTitle').value;
         document.getElementById('printDateDisplay').innerText = "תאריך: " + document.getElementById('dateInput').value;
         document.getElementById('printManagerDisplay').innerText = "אחראי: " + document.getElementById('managerInput').value;
 
-        // 2. יצירת סגנון הדפסה דינמי
         const style = document.createElement('style');
         style.id = 'print-orientation-style';
         
         if (orientation === 'landscape') {
-            style.innerHTML = '@page { size: A4 landscape; }';
+            style.innerHTML = '@page { size: A4 landscape; margin: 10mm; }';
         } else {
-            style.innerHTML = '@page { size: A4 portrait; }';
+            style.innerHTML = '@page { size: A4 portrait; margin: 10mm; }';
         }
 
         document.head.appendChild(style);
-
-        // 3. ביצוע ההדפסה
         window.print();
 
-        // 4. ניקוי הסגנון אחרי ההדפסה
-        // (הערה: בדפדפנים מסוימים זה קורה מהר מדי, אבל לרוב זה עובד מצוין)
         setTimeout(() => {
-            document.head.removeChild(style);
+            const el = document.getElementById('print-orientation-style');
+            if(el) el.remove();
         }, 1000);
     }
 
